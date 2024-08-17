@@ -14,18 +14,24 @@ type IptablesCmd struct {
 	jump            string
 }
 
-func Iptables_cmd(cmd IptablesCmd) string {
-	// TODO us iptables instead
+func iptablesCmd(option string) string {
 	base := "iptables"
-	// TODO sperate option by place in command iptables
-	option := " -p " + cmd.protocol + " --" + cmd.direction + cmd.port + " -m " + cmd.module + " --cstate " + cmd.connectionState + " -j " + cmd.jump
 	full := exec.Command(base, option)
 	out, err := full.Output()
 	if err != nil {
 		fmt.Println(err)
 		return err.Error()
 	}
-
 	fmt.Println(string(out))
 	return string(out)
+}
+
+func IptablesAddRule(cmd IptablesCmd) string {
+	option := " -p " + cmd.protocol + " --" + cmd.direction + cmd.port + " -m " + cmd.module + " --cstate " + cmd.connectionState + " -j " + cmd.jump
+	return iptablesCmd(option)
+}
+
+func IptablesList() string {
+	option := " -L"
+	return iptablesCmd(option)
 }

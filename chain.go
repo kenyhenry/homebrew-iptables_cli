@@ -103,6 +103,9 @@ func Chain() {
 		default:
 			if !msgBoxActivate {
 				chainlist.HandleEvent(e)
+			} else {
+				msgBox.RuleHandleEvent(e)
+				// ui.Render(msgBox.Widget)
 			}
 		}
 	}

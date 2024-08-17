@@ -7,9 +7,10 @@ import (
 
 // NewRuleObject represents the rule list widget with its internal state
 type NewRuleObject struct {
-	Widget   *widgets.List
-	RuleDesc []string
-	IsMoving bool
+	Widget          *widgets.List
+	RuleDesc        []string
+	IsMoving        bool
+	BaseTextLengths []int
 }
 
 // NewRule creates and returns a new NewRuleObject widget
@@ -32,32 +33,39 @@ func NewRule() *NewRuleObject {
 	msgBox.TextStyle = ui.NewStyle(ui.ColorCyan)
 	msgBox.Rows = ruleDesc
 
+	baseTextLengths := make([]int, len(ruleDesc))
+	for i, text := range ruleDesc {
+		baseTextLengths[i] = len(text)
+	}
+
 	return &NewRuleObject{
-		Widget:   msgBox,
-		RuleDesc: ruleDesc,
-		IsMoving: false,
+		Widget:          msgBox,
+		RuleDesc:        ruleDesc,
+		IsMoving:        false,
+		BaseTextLengths: baseTextLengths,
 	}
 }
 
 // RuleHandleEvent handles the keyboard events for the NewRuleObject widget
 func (nc *NewRuleObject) RuleHandleEvent(e ui.Event) {
+	currentRow := nc.Widget.SelectedRow
+	baseTextLength := nc.BaseTextLengths[currentRow]
+
 	switch e.ID {
 	case "<Enter>":
+		// TODO : send command to add new rule
 		nc.IsMoving = !nc.IsMoving
 	case "j", "<Down>":
 		nc.Widget.ScrollDown()
 	case "k", "<Up>":
 		nc.Widget.ScrollUp()
 	case "<Backspace>":
-		// Handle backspace to remove the last character
-		currentRow := nc.Widget.SelectedRow
-		if len(nc.RuleDesc[currentRow]) > 0 {
+		if len(nc.RuleDesc[currentRow]) > baseTextLength {
 			nc.RuleDesc[currentRow] = nc.RuleDesc[currentRow][:len(nc.RuleDesc[currentRow])-1]
 		}
 	default:
 		// Handle regular character input
 		if len(e.ID) == 1 {
-			currentRow := nc.Widget.SelectedRow
 			nc.RuleDesc[currentRow] += e.ID
 		}
 	}
