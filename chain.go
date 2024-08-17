@@ -13,7 +13,19 @@ func Chain() {
 	}
 	defer ui.Close()
 
+	logo := `I)iiii P)ppppp  T)tttttt   A)aa   B)bbbb   L)       E)eeeeee  S)ssss       C)ccc  L)       I)iiii
+			   I)   P)    pp    T)     A)  aa  B)   bb  L)       E)       S)    ss     C)   cc L)         I)
+			   I)   P)ppppp     T)    A)    aa B)bbbb   L)       E)eeeee   S)ss       C)       L)         I)
+			   I)   P)          T)    A)aaaaaa B)   bb  L)       E)            S)     C)       L)         I)
+			   I)   P)          T)    A)    aa B)    bb L)       E)       S)    ss     C)   cc L)         I)
+			 I)iiii P)          T)    A)    aa B)bbbbb  L)llllll E)eeeeee  S)ssss       C)ccc  L)llllll I)iiii`
+
 	termWidth, termHeight := ui.TerminalDimensions()
+
+	header := widgets.NewParagraph()
+	header.Text = logo
+	header.SetRect(0, 0, termWidth, 10)
+	header.TextStyle.Fg = ui.ColorGreen
 
 	footer := widgets.NewParagraph()
 	footer.Text = "<a> new rule | <q> quit"
@@ -25,7 +37,7 @@ func Chain() {
 	// TODO each name is iptables chain
 	chain := []string{"pierwszy", "drugi", "trzeci", "żółw", "four", "five"}
 	tabpane := widgets.NewTabPane(chain...)
-	tabpane.SetRect(0, 3, termWidth, termHeight-3)
+	tabpane.SetRect(0, 10, termWidth, termHeight-3)
 	tabpane.Border = true
 
 	var chainlist *NewChainlist
@@ -39,7 +51,7 @@ func Chain() {
 	}
 
 	// Simulate rendering the active tab
-	ui.Render(footer, tabpane)
+	ui.Render(header, footer, tabpane)
 	renderTab()
 
 	msgBoxActivate := false
@@ -55,18 +67,18 @@ func Chain() {
 			if msgBoxActivate {
 				msgBoxActivate = false
 				ui.Clear()
-				ui.Render(footer, tabpane)
+				ui.Render(header, footer, tabpane)
 				renderTab()
 			}
 		case "<Left>":
 			tabpane.FocusLeft()
 			ui.Clear()
-			ui.Render(footer, tabpane)
+			ui.Render(header, footer, tabpane)
 			renderTab()
 		case "<Right>":
 			tabpane.FocusRight()
 			ui.Clear()
-			ui.Render(footer, tabpane)
+			ui.Render(header, footer, tabpane)
 			renderTab()
 		case "<Down>":
 			if msgBoxActivate {
@@ -82,11 +94,9 @@ func Chain() {
 			}
 		case "a":
 			if !msgBoxActivate {
-				// TODO maybe message box in seperate file
-				// TODO handle all key to tape inse of each item list
 				msgBoxActivate = true
 				ui.Clear()
-				ui.Render(footer, tabpane)
+				ui.Render(header, footer, tabpane)
 				renderTab()
 				ui.Render(msgBox.Widget)
 			}

@@ -5,23 +5,25 @@ import (
 	"github.com/gizak/termui/v3/widgets"
 )
 
-// NewChainlist represents the chain list widget with its internal state
+// NewRuleObject represents the rule list widget with its internal state
 type NewRuleObject struct {
 	Widget   *widgets.List
+	RuleDesc []string
 	IsMoving bool
 }
 
-// New creates and returns a new NewChainlist widget
-func NewRule() *NewChainlist {
+// NewRule creates and returns a new NewRuleObject widget
+func NewRule() *NewRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
-		"protocol :",
-		"direction :",
-		"port :",
-		"module :",
-		"connection states :",
-		"jump :",
+		"protocol : ",
+		"direction : ",
+		"port : ",
+		"module : ",
+		"connection states : ",
+		"jump : ",
 	}
+
 	termWidth, termHeight := ui.TerminalDimensions()
 	msgBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
 	msgBox.Border = true
@@ -29,29 +31,38 @@ func NewRule() *NewChainlist {
 	msgBox.WrapText = false
 	msgBox.TextStyle = ui.NewStyle(ui.ColorCyan)
 	msgBox.Rows = ruleDesc
-	return &NewChainlist{
+
+	return &NewRuleObject{
 		Widget:   msgBox,
+		RuleDesc: ruleDesc,
 		IsMoving: false,
 	}
 }
 
-// HandleEvent handles the keyboard events for the NewChainlist widget
-func (nc *NewChainlist) RuleHandleEvent(e ui.Event) {
+// RuleHandleEvent handles the keyboard events for the NewRuleObject widget
+func (nc *NewRuleObject) RuleHandleEvent(e ui.Event) {
 	switch e.ID {
 	case "<Enter>":
 		nc.IsMoving = !nc.IsMoving
 	case "j", "<Down>":
 		nc.Widget.ScrollDown()
-		if nc.IsMoving {
-			moveDown(nc.Chainlist, nc.Widget.SelectedRow-1)
-			nc.Widget.Rows = nc.Chainlist
-		}
 	case "k", "<Up>":
 		nc.Widget.ScrollUp()
-		if nc.IsMoving {
-			moveUp(nc.Chainlist, nc.Widget.SelectedRow+1)
-			nc.Widget.Rows = nc.Chainlist
+	case "<Backspace>":
+		// Handle backspace to remove the last character
+		currentRow := nc.Widget.SelectedRow
+		if len(nc.RuleDesc[currentRow]) > 0 {
+			nc.RuleDesc[currentRow] = nc.RuleDesc[currentRow][:len(nc.RuleDesc[currentRow])-1]
+		}
+	default:
+		// Handle regular character input
+		if len(e.ID) == 1 {
+			currentRow := nc.Widget.SelectedRow
+			nc.RuleDesc[currentRow] += e.ID
 		}
 	}
+
+	// Update the widget with the modified RuleDesc
+	nc.Widget.Rows = nc.RuleDesc
 	ui.Render(nc.Widget)
 }

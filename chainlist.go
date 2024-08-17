@@ -30,13 +30,11 @@ func NewChainList(chainName string) *NewChainlist {
 
 	// Initialize the List widget
 	l := widgets.NewList()
-	l.TitleStyle.Fg = ui.ColorCyan
 	l.Rows = chainlist
 	l.TextStyle = ui.NewStyle(ui.ColorYellow)
 	l.WrapText = false
 	termWidth, termHeight := ui.TerminalDimensions()
-	l.SetRect(1, 5, termWidth-1, termHeight-4)
-	l.Title = "Iptable_cli"
+	l.SetRect(1, 12, termWidth-1, termHeight-4)
 
 	return &NewChainlist{
 		Widget:    l,
