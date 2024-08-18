@@ -5,14 +5,14 @@ import (
 	"github.com/gizak/termui/v3/widgets"
 )
 
-type NewRuleObject struct {
+type EditRuleObject struct {
 	Widget          *widgets.List
 	RuleDesc        []string
 	IsMoving        bool
 	BaseTextLengths []int
 }
 
-func NewRule() *NewRuleObject {
+func EditRule() *EditRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
 		"protocol : ",
@@ -36,7 +36,7 @@ func NewRule() *NewRuleObject {
 		baseTextLengths[i] = len(text)
 	}
 
-	return &NewRuleObject{
+	return &EditRuleObject{
 		Widget:          msgBox,
 		RuleDesc:        ruleDesc,
 		IsMoving:        false,
@@ -44,7 +44,7 @@ func NewRule() *NewRuleObject {
 	}
 }
 
-func (nc *NewRuleObject) HandleEvent(e ui.Event) {
+func (nc *EditRuleObject) HandleEvent(e ui.Event) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
 
@@ -70,6 +70,6 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event) {
 	ui.Render(nc.Widget)
 }
 
-func (nr *NewRuleObject) Render() {
+func (nr *EditRuleObject) Render() {
 	ui.Render(nr.Widget)
 }

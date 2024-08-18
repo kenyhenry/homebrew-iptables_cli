@@ -13,7 +13,7 @@ func Chain() {
 	}
 	defer ui.Close()
 
-	logo := `I)iiii P)ppppp  T)tttttt   A)aa   B)bbbb   L)       E)eeeeee  S)ssss       C)ccc  L)       I)iiii
+	logo := ` I)iiii P)ppppp  T)tttttt   A)aa   B)bbbb   L)       E)eeeeee  S)ssss       C)ccc  L)       I)iiii
 			   I)   P)    pp    T)     A)  aa  B)   bb  L)       E)       S)    ss     C)   cc L)         I)
 			   I)   P)ppppp     T)    A)    aa B)bbbb   L)       E)eeeee   S)ss       C)       L)         I)
 			   I)   P)          T)    A)aaaaaa B)   bb  L)       E)            S)     C)       L)         I)
@@ -28,85 +28,72 @@ func Chain() {
 	header.TextStyle.Fg = ui.ColorGreen
 
 	footer := widgets.NewParagraph()
-	footer.Text = "<a> new rule | <q> quit"
+	footer.Text = "<a> new rule | <e> edit rule | <q> quit"
 	footer.SetRect(0, termHeight-3, termWidth, termHeight)
 	footer.Border = true
 	footer.WrapText = true
 	footer.TextStyle.Bg = ui.ColorBlue
 
-	// TODO each name is iptables chain
-	chain := []string{"pierwszy", "drugi", "trzeci", "żółw", "four", "five"}
+	var chain []string
 	tabpane := widgets.NewTabPane(chain...)
 	tabpane.SetRect(0, 10, termWidth, termHeight-3)
 	tabpane.Border = true
 
-	var chainlist *NewChainlist
+	state := NewUIState(header, footer, tabpane)
 
 	renderTab := func() {
+		// TODO get rule of chain by sending command iptables -C
+		chain = []string{"pierwszy", "drugi", "trzeci", "żółw", "four", "five"}
+		tabpane.TabNames = chain
 		if tabpane.ActiveTabIndex >= 0 && tabpane.ActiveTabIndex < len(chain) {
-			// TODO get rule of chain by sending command iptables -C
-			chainlist = NewChainList(chain[tabpane.ActiveTabIndex])
-			ui.Render(chainlist.Widget)
+			chainlist := NewChainList(chain[tabpane.ActiveTabIndex])
+			state.handlers["chainList"] = chainlist
+			state.SetActive("chainList")
 		}
 	}
 
-	// Simulate rendering the active tab
-	ui.Render(header, footer, tabpane)
-	renderTab()
+	newRule := NewRule()
+	// msgBox := MsgBox()
+	editRule := EditRule()
+	newChain := NewChain()
 
-	msgBoxActivate := false
-	msgBox := NewRule()
+	state.handlers["newRule"] = newRule
+	state.handlers["editRule"] = editRule
+	state.handlers["newChain"] = newChain
+
+	renderTab()
+	ui.Render(header, footer, tabpane)
 
 	uiEvents := ui.PollEvents()
 	for {
 		e := <-uiEvents
 		switch e.ID {
+
 		case "q", "<C-c>":
 			return
 		case "<Escape>":
-			if msgBoxActivate {
-				msgBoxActivate = false
-				ui.Clear()
-				ui.Render(header, footer, tabpane)
-				renderTab()
-			}
+			ui.Render(header, footer, tabpane)
+			renderTab()
 		case "<Left>":
 			tabpane.FocusLeft()
 			ui.Clear()
+			state.Render()
 			ui.Render(header, footer, tabpane)
 			renderTab()
 		case "<Right>":
 			tabpane.FocusRight()
 			ui.Clear()
+			state.Render()
 			ui.Render(header, footer, tabpane)
 			renderTab()
-		case "<Down>":
-			if msgBoxActivate {
-				msgBox.RuleHandleEvent(e)
-			} else {
-				chainlist.HandleEvent(e)
-			}
-		case "<Up>":
-			if msgBoxActivate {
-				msgBox.RuleHandleEvent(e)
-			} else {
-				chainlist.HandleEvent(e)
-			}
 		case "a":
-			if !msgBoxActivate {
-				msgBoxActivate = true
-				ui.Clear()
-				ui.Render(header, footer, tabpane)
-				renderTab()
-				ui.Render(msgBox.Widget)
-			}
+			state.SetActive("newRule")
+		case "e":
+			state.SetActive("editRule")
+		case "c":
+			state.SetActive("newChain")
 		default:
-			if !msgBoxActivate {
-				chainlist.HandleEvent(e)
-			} else {
-				msgBox.RuleHandleEvent(e)
-				// ui.Render(msgBox.Widget)
-			}
+			state.HandleEvent(e)
 		}
 	}
 }

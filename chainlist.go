@@ -5,14 +5,12 @@ import (
 	"github.com/gizak/termui/v3/widgets"
 )
 
-// NewChainlist represents the chain list widget with its internal state
 type NewChainlist struct {
 	Widget    *widgets.List
 	Chainlist []string
 	IsMoving  bool
 }
 
-// New creates and returns a new NewChainlist widget
 func NewChainList(chainName string) *NewChainlist {
 	// TODO get iptables rule and screen
 	chainlist := []string{
@@ -28,7 +26,6 @@ func NewChainList(chainName string) *NewChainlist {
 		"[9] baz",
 	}
 
-	// Initialize the List widget
 	l := widgets.NewList()
 	l.Rows = chainlist
 	l.TextStyle = ui.NewStyle(ui.ColorYellow)
@@ -43,33 +40,28 @@ func NewChainList(chainName string) *NewChainlist {
 	}
 }
 
-// HandleEvent handles the keyboard events for the NewChainlist widget
 func (nc *NewChainlist) HandleEvent(e ui.Event) {
 	switch e.ID {
 	case "<Enter>":
 		nc.IsMoving = !nc.IsMoving
-	case "j", "<Down>":
+	case "<Down>":
 		nc.Widget.ScrollDown()
 		if nc.IsMoving {
 			moveDown(nc.Chainlist, nc.Widget.SelectedRow-1)
 			nc.Widget.Rows = nc.Chainlist
 		}
-	case "k", "<Up>":
+	case "<Up>":
 		nc.Widget.ScrollUp()
 		if nc.IsMoving {
 			moveUp(nc.Chainlist, nc.Widget.SelectedRow+1)
 			nc.Widget.Rows = nc.Chainlist
 		}
-	case "<C-d>":
-		nc.Widget.ScrollHalfPageDown()
-	case "<C-u>":
-		nc.Widget.ScrollHalfPageUp()
-	case "<C-f>":
-		nc.Widget.ScrollPageDown()
-	case "<C-b>":
-		nc.Widget.ScrollPageUp()
 	}
 	ui.Render(nc.Widget)
+}
+
+func (nr *NewChainlist) Render() {
+	ui.Render(nr.Widget)
 }
 
 func moveUp(slice []string, index int) {
