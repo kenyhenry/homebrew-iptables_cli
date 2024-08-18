@@ -14,6 +14,9 @@ type IptablesCmd struct {
 	jump            string
 }
 
+// TODO : on sending every iptables cmd print return in a msgBox
+// msgBox := MsgBox()
+
 func iptablesCmd(option string) string {
 	base := "iptables"
 	full := exec.Command(base, option)

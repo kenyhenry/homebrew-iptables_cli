@@ -53,12 +53,9 @@ func Chain() {
 	}
 
 	newRule := NewRule()
-	// msgBox := MsgBox()
-	editRule := EditRule()
 	newChain := NewChain()
 
 	state.handlers["newRule"] = newRule
-	state.handlers["editRule"] = editRule
 	state.handlers["newChain"] = newChain
 
 	renderTab()
@@ -70,7 +67,7 @@ func Chain() {
 
 		switch e.ID {
 
-		case "q", "<C-c>":
+		case "<C-c>":
 			return
 		case "<Escape>":
 			ui.Render(header, footer, tabpane)
@@ -91,22 +88,16 @@ func Chain() {
 			if isDifferentFromKnownHandlers(state) {
 				state.SetActive("newRule")
 			} else {
-				state.HandleEvent(e)
-			}
-		case "e":
-			if isDifferentFromKnownHandlers(state) {
-				state.SetActive("editRule")
-			} else {
-				state.HandleEvent(e)
+				state.HandleEvent(e, state)
 			}
 		case "c":
 			if isDifferentFromKnownHandlers(state) {
 				state.SetActive("newChain")
 			} else {
-				state.HandleEvent(e)
+				state.HandleEvent(e, state)
 			}
 		default:
-			state.HandleEvent(e)
+			state.HandleEvent(e, state)
 
 		}
 	}

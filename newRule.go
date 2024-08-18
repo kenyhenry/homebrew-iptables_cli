@@ -42,7 +42,7 @@ func NewRule() *NewRuleObject {
 	}
 }
 
-func (nc *NewRuleObject) HandleEvent(e ui.Event) {
+func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
 

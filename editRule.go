@@ -12,7 +12,7 @@ type EditRuleObject struct {
 	BaseTextLengths []int
 }
 
-func EditRule() *EditRuleObject {
+func EditRule(rule string) *EditRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
 		"protocol : ",
@@ -23,8 +23,7 @@ func EditRule() *EditRuleObject {
 		"jump : ",
 	}
 
-	// TODO : get rule arguments and print it
-	// TODO : make rule arguments erasable
+	// TODO : format rule arguments to match with ruleDesc
 
 	termWidth, termHeight := ui.TerminalDimensions()
 	msgBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
@@ -39,6 +38,8 @@ func EditRule() *EditRuleObject {
 		baseTextLengths[i] = len(text)
 	}
 
+	ruleDesc[0] += rule
+
 	return &EditRuleObject{
 		Widget:          msgBox,
 		RuleDesc:        ruleDesc,
@@ -47,7 +48,7 @@ func EditRule() *EditRuleObject {
 	}
 }
 
-func (nc *EditRuleObject) HandleEvent(e ui.Event) {
+func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
 

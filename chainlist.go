@@ -40,7 +40,8 @@ func NewChainList(chainName string) *NewChainlist {
 	}
 }
 
-func (nc *NewChainlist) HandleEvent(e ui.Event) {
+func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
+	showOtherWidget := false
 	switch e.ID {
 	case "<Enter>":
 		nc.IsMoving = !nc.IsMoving
@@ -56,8 +57,20 @@ func (nc *NewChainlist) HandleEvent(e ui.Event) {
 			moveUp(nc.Chainlist, nc.Widget.SelectedRow+1)
 			nc.Widget.Rows = nc.Chainlist
 		}
+	case "e":
+		showOtherWidget = true
+		editRule := EditRule(nc.Chainlist[nc.Widget.SelectedRow])
+		state.handlers["editRule"] = editRule
+		state.SetActive("editRule")
+		state.Render()
+	case "d":
+		// delete rule selected
+		// nc.Widget.SelectedRow
 	}
-	ui.Render(nc.Widget)
+	if !showOtherWidget {
+		ui.Render(nc.Widget)
+		showOtherWidget = false
+	}
 }
 
 func (nr *NewChainlist) Render() {

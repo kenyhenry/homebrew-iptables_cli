@@ -6,7 +6,7 @@ import (
 )
 
 type WidgetHandler interface {
-	HandleEvent(e ui.Event)
+	HandleEvent(e ui.Event, state *UIState)
 	Render()
 }
 
@@ -37,9 +37,9 @@ func (state *UIState) Default() {
 	// state.
 }
 
-func (state *UIState) HandleEvent(e ui.Event) {
+func (state *UIState) HandleEvent(e ui.Event, statePrm *UIState) {
 	if state.activeHandler != nil {
-		state.activeHandler.HandleEvent(e)
+		state.activeHandler.HandleEvent(e, state)
 	}
 }
 

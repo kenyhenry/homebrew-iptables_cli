@@ -29,7 +29,7 @@ func NewChain() *NewChainObject {
 	}
 }
 
-func (nc *NewChainObject) HandleEvent(e ui.Event) {
+func (nc *NewChainObject) HandleEvent(e ui.Event, state *UIState) {
 	switch e.ID {
 	case "<Enter>":
 		// TODO : send command to add new chain

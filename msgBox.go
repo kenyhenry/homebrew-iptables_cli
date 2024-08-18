@@ -25,7 +25,7 @@ func MsgBox(message string) *MsgBoxObject {
 	}
 }
 
-func (nc *MsgBoxObject) HandleEvent(e ui.Event) {
+func (nc *MsgBoxObject) HandleEvent(e ui.Event, state *UIState) {
 	// Do Nothing
 }
 
