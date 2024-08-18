@@ -66,6 +66,13 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 	case "d":
 		// delete rule selected
 		// nc.Widget.SelectedRow
+		showOtherWidget = true
+		// TODO: ret of command
+		ret := "test"
+		msgBox := MsgBox(ret)
+		state.handlers["msgBox"] = msgBox
+		state.SetActive("msgBox")
+		state.Render()
 	}
 	if !showOtherWidget {
 		ui.Render(nc.Widget)

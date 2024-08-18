@@ -67,7 +67,12 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 		ui.Clear()
 		ui.Render(state.header, state.footer, state.tabpane)
 		state.SetActive("chainList")
-		// TODO: send msgBox
+		// TODO: ret of command
+		ret := "test"
+		msgBox := MsgBox(ret)
+		state.handlers["msgBox"] = msgBox
+		state.SetActive("msgBox")
+		state.Render()
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":

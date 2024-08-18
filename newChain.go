@@ -30,9 +30,17 @@ func NewChain() *NewChainObject {
 }
 
 func (nc *NewChainObject) HandleEvent(e ui.Event, state *UIState) {
+	showOtherWidget := false
 	switch e.ID {
 	case "<Enter>":
+		showOtherWidget = true
 		// TODO : send command to add new chain
+		// TODO: ret of command
+		ret := "test"
+		msgBox := MsgBox(ret)
+		state.handlers["msgBox"] = msgBox
+		state.SetActive("msgBox")
+		state.Render()
 	case "<Backspace>":
 		if len(nc.Widget.Text) > len(nc.BaseText) {
 			nc.Widget.Text = nc.Widget.Text[:len(nc.Widget.Text)-1]
@@ -42,7 +50,9 @@ func (nc *NewChainObject) HandleEvent(e ui.Event, state *UIState) {
 			nc.Widget.Text += e.ID
 		}
 	}
-	ui.Render(nc.Widget)
+	if !showOtherWidget {
+		ui.Render(nc.Widget)
+	}
 }
 
 func (nr *NewChainObject) Render() {
