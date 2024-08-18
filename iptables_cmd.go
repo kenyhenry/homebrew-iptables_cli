@@ -7,12 +7,12 @@ import (
 )
 
 type IptablesCmd struct {
-	protocol        string
-	direction       string
-	port            string
-	module          string
-	connectionState string
-	jump            string
+	Protocol        string
+	Direction       string
+	Port            string
+	Module          string
+	ConnectionState string
+	Jump            string
 }
 
 // TODO : on sending every iptables cmd print return in a msgBox
@@ -25,6 +25,31 @@ func containString(target string, substring []string) bool {
 		}
 	}
 	return false
+}
+
+func generateIptablesArgs(cmd IptablesCmd) []string {
+	var args []string
+
+	// Check each field and append corresponding argument if not empty
+	if cmd.Protocol != "" {
+		args = append(args, "-p", cmd.Protocol)
+	}
+	if cmd.Direction != "" {
+		args = append(args, "-i", cmd.Direction) // Assuming direction corresponds to interface input
+	}
+	if cmd.Port != "" {
+		args = append(args, "--dport", cmd.Port) // Assuming port is destination port
+	}
+	if cmd.Module != "" {
+		args = append(args, "-m", cmd.Module)
+	}
+	if cmd.ConnectionState != "" {
+		args = append(args, "-m", "conntrack", "--ctstate", cmd.ConnectionState)
+	}
+	if cmd.Jump != "" {
+		args = append(args, "-j", cmd.Jump)
+	}
+	return args
 }
 
 func iptablesCmd(option string) string {
@@ -40,7 +65,7 @@ func iptablesCmd(option string) string {
 }
 
 func IptablesAddRule(cmd IptablesCmd) string {
-	option := " -p " + cmd.protocol + " --" + cmd.direction + cmd.port + " -m " + cmd.module + " --cstate " + cmd.connectionState + " -j " + cmd.jump
+	option := " -p " + cmd.Protocol + " --" + cmd.Direction + cmd.Port + " -m " + cmd.Module + " --cstate " + cmd.ConnectionState + " -j " + cmd.Jump
 	return iptablesCmd(option)
 }
 
