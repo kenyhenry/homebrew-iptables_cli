@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
@@ -23,7 +25,7 @@ func EditRule(rule string) *EditRuleObject {
 		"jump : ",
 	}
 
-	// TODO : format rule arguments to match with ruleDesc
+	ruleSplit := strings.Fields(rule)
 
 	termWidth, termHeight := ui.TerminalDimensions()
 	msgBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
@@ -38,7 +40,12 @@ func EditRule(rule string) *EditRuleObject {
 		baseTextLengths[i] = len(text)
 	}
 
-	ruleDesc[0] += rule
+	for i := range ruleDesc {
+		// TODO : make ruleSplit match with ruleDesc
+		if i < len(ruleSplit) {
+			ruleDesc[i] += ruleSplit[i]
+		}
+	}
 
 	return &EditRuleObject{
 		Widget:          msgBox,
