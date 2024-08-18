@@ -45,10 +45,15 @@ func NewRule() *NewRuleObject {
 func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
+	showOtherWidget := false
 
 	switch e.ID {
 	case "<Enter>":
+		showOtherWidget = true
 		// TODO : send command to add new rule
+		ui.Clear()
+		ui.Render(state.header, state.footer, state.tabpane)
+		state.SetActive("chainList")
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":
@@ -68,7 +73,9 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	}
 
 	nc.Widget.Rows = nc.RuleDesc
-	ui.Render(nc.Widget)
+	if !showOtherWidget {
+		ui.Render(nc.Widget)
+	}
 }
 
 func (nr *NewRuleObject) Render() {

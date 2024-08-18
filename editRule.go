@@ -58,10 +58,16 @@ func EditRule(rule string) *EditRuleObject {
 func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
+	showOtherWidget := false
 
 	switch e.ID {
 	case "<Enter>":
+		showOtherWidget = true
 		// TODO : send command to edit rule
+		ui.Clear()
+		ui.Render(state.header, state.footer, state.tabpane)
+		state.SetActive("chainList")
+		// TODO: send msgBox
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":
@@ -77,7 +83,9 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	}
 
 	nc.Widget.Rows = nc.RuleDesc
-	ui.Render(nc.Widget)
+	if !showOtherWidget {
+		ui.Render(nc.Widget)
+	}
 }
 
 func (nr *EditRuleObject) Render() {
