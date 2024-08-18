@@ -8,7 +8,6 @@ import (
 type NewRuleObject struct {
 	Widget          *widgets.List
 	RuleDesc        []string
-	IsMoving        bool
 	BaseTextLengths []int
 }
 
@@ -39,7 +38,6 @@ func NewRule() *NewRuleObject {
 	return &NewRuleObject{
 		Widget:          msgBox,
 		RuleDesc:        ruleDesc,
-		IsMoving:        false,
 		BaseTextLengths: baseTextLengths,
 	}
 }
@@ -51,7 +49,6 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event) {
 	switch e.ID {
 	case "<Enter>":
 		// TODO : send command to add new rule
-		nc.IsMoving = !nc.IsMoving
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":
@@ -59,6 +56,10 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event) {
 	case "<Backspace>":
 		if len(nc.RuleDesc[currentRow]) > baseTextLength {
 			nc.RuleDesc[currentRow] = nc.RuleDesc[currentRow][:len(nc.RuleDesc[currentRow])-1]
+		}
+	case "c":
+		if len(e.ID) == 1 {
+			nc.RuleDesc[currentRow] += e.ID
 		}
 	default:
 		if len(e.ID) == 1 {

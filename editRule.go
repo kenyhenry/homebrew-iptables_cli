@@ -23,6 +23,9 @@ func EditRule() *EditRuleObject {
 		"jump : ",
 	}
 
+	// TODO : get rule arguments and print it
+	// TODO : make rule arguments erasable
+
 	termWidth, termHeight := ui.TerminalDimensions()
 	msgBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
 	msgBox.Border = true
@@ -50,8 +53,7 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event) {
 
 	switch e.ID {
 	case "<Enter>":
-		// TODO : send command to add new rule
-		nc.IsMoving = !nc.IsMoving
+		// TODO : send command to edit rule
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":

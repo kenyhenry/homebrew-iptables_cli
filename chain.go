@@ -67,6 +67,7 @@ func Chain() {
 	uiEvents := ui.PollEvents()
 	for {
 		e := <-uiEvents
+
 		switch e.ID {
 
 		case "q", "<C-c>":
@@ -87,13 +88,34 @@ func Chain() {
 			ui.Render(header, footer, tabpane)
 			renderTab()
 		case "a":
-			state.SetActive("newRule")
+			if isDifferentFromKnownHandlers(state) {
+				state.SetActive("newRule")
+			} else {
+				state.HandleEvent(e)
+			}
 		case "e":
-			state.SetActive("editRule")
+			if isDifferentFromKnownHandlers(state) {
+				state.SetActive("editRule")
+			} else {
+				state.HandleEvent(e)
+			}
 		case "c":
-			state.SetActive("newChain")
+			if isDifferentFromKnownHandlers(state) {
+				state.SetActive("newChain")
+			} else {
+				state.HandleEvent(e)
+			}
 		default:
 			state.HandleEvent(e)
+
 		}
 	}
+}
+
+func isDifferentFromKnownHandlers(state *UIState) bool {
+	_, isNewRule := state.activeHandler.(*NewRuleObject)
+	_, isEditRule := state.activeHandler.(*EditRuleObject)
+	_, isNewChain := state.activeHandler.(*NewChainObject)
+
+	return !isNewRule && !isEditRule && !isNewChain
 }

@@ -32,8 +32,7 @@ func NewChain() *NewChainObject {
 func (nc *NewChainObject) HandleEvent(e ui.Event) {
 	switch e.ID {
 	case "<Enter>":
-		// TODO : send command to add new rule
-		// nc.IsMoving = !nc.IsMoving
+		// TODO : send command to add new chain
 	case "<Backspace>":
 		if len(nc.Widget.Text) > len(nc.BaseText) {
 			nc.Widget.Text = nc.Widget.Text[:len(nc.Widget.Text)-1]
