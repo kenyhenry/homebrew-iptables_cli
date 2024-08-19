@@ -9,6 +9,7 @@ type NewChainlist struct {
 	Widget    *widgets.List
 	Chainlist []string
 	IsMoving  bool
+	Em        *EventManager
 }
 
 func NewChainList(chainName string) *NewChainlist {
@@ -26,6 +27,8 @@ func NewChainList(chainName string) *NewChainlist {
 		"[9] baz",
 	}
 
+	em := NewEventManager()
+
 	l := widgets.NewList()
 	l.Rows = chainlist
 	l.TextStyle = ui.NewStyle(ui.ColorYellow)
@@ -33,10 +36,42 @@ func NewChainList(chainName string) *NewChainlist {
 	termWidth, termHeight := ui.TerminalDimensions()
 	l.SetRect(1, 12, termWidth-1, termHeight-4)
 
+	em.AddListener("deleteChain", func(e Event) {
+		// TODO : delete chain selected "chainName"
+		// TODO : ret of command
+		if e.Data == "yes" {
+			ret := string(e.Data)
+			msgBox := MsgBox(ret)
+			ui.Render(msgBox.Widget)
+		}
+
+	})
+
+	em.AddListener("deleteRule", func(e Event) {
+		// TODO : delete rule selected chainlist[l.SelectedRow]
+		// TODO : ret of command
+		if e.Data == "yes" {
+			ret := string(e.Data)
+			msgBox := MsgBox(ret)
+			ui.Render(msgBox.Widget)
+		}
+
+	})
+
+	em.AddListener("setPolicy", func(e Event) {
+		// TODO : set chain policy as selectBox to e.Data
+		// TODO : ret of command
+		ret := string(e.Data)
+		msgBox := MsgBox(ret)
+		ui.Render(msgBox.Widget)
+
+	})
+
 	return &NewChainlist{
 		Widget:    l,
 		Chainlist: chainlist,
 		IsMoving:  false,
+		Em:        em,
 	}
 }
 
@@ -63,15 +98,23 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 		state.handlers["editRule"] = editRule
 		state.SetActive("editRule")
 		state.Render()
-	case "d":
-		// delete rule selected
-		// nc.Widget.SelectedRow
+	case "p":
 		showOtherWidget = true
-		// TODO: ret of command
-		ret := "test"
-		msgBox := MsgBox(ret)
-		state.handlers["msgBox"] = msgBox
-		state.SetActive("msgBox")
+		selectBox := SelectBox([]string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}, nc.Em)
+		state.handlers["selectBox"] = selectBox
+		state.SetActive("selectBox")
+		state.Render()
+	case "D":
+		showOtherWidget = true
+		selectBox := SelectBox([]string{"yes", "no"}, nc.Em)
+		state.handlers["selectBox"] = selectBox
+		state.SetActive("selectBox")
+		state.Render()
+	case "d":
+		showOtherWidget = true
+		selectBox := SelectBox([]string{"yes", "no"}, nc.Em)
+		state.handlers["selectBox"] = selectBox
+		state.SetActive("selectBox")
 		state.Render()
 	}
 	if !showOtherWidget {
