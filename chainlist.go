@@ -143,7 +143,7 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 		state.Render()
 	case "d":
 		showOtherWidget = true
-		info := "Are you sure you want to delete rule : " + strconv.Itoa(nc.Widget.SelectedRow)
+		info := "Are you sure you want to delete rule : " + strconv.Itoa(nc.Widget.SelectedRow) + " in chain : " + nc.ChaineName
 		selectBox := SelectBox(info, "deleteRule", []string{"yes", "no"}, nc.Em)
 		state.handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")

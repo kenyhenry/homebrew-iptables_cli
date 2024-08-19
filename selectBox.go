@@ -20,16 +20,17 @@ func SelectBox(textInfo string, eventName string, selectItems []string, em *Even
 	selectBox.Border = true
 	selectBox.TitleStyle.Fg = 3
 	selectBox.WrapText = true
-	selectBox.TextStyle = ui.NewStyle(ui.ColorCyan)
+	selectBox.TextStyle = ui.NewStyle(ui.ColorMagenta)
 	selectBox.Rows = selectItems
 
 	paragraph := widgets.NewParagraph()
 	paragraph.Text = textInfo
+	paragraph.BorderStyle.Fg = ui.ColorRed
 	paragraph.SetRect(0, 0, 3, 3)
 	paragraph.Border = true
 
 	grid := ui.NewGrid()
-	grid.SetRect(termWidth/2-20, termHeight/2-10, termWidth/2+20, termHeight/2+10)
+	grid.SetRect(termWidth/2-22, termHeight/2-10, termWidth/2+22, termHeight/2+10)
 	grid.Set(
 		ui.NewRow(0.2, paragraph),
 		ui.NewRow(0.8, selectBox),
