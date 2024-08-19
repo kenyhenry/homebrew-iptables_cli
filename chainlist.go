@@ -1,19 +1,22 @@
 package main
 
 import (
+	"strconv"
+
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
 
 type NewChainlist struct {
-	Widget    *widgets.List
-	Chainlist []string
-	IsMoving  bool
-	Em        *EventManager
+	Widget     *widgets.List
+	Chainlist  []string
+	IsMoving   bool
+	Em         *EventManager
+	ChaineName string
 }
 
 func NewChainList(chainName string) *NewChainlist {
-	// TODO get iptables rule and screen
+	// TODO send iptables command to get iptables rule and screen
 	chainlist := []string{
 		"[0] github.com/gizak/termui/v3",
 		"[1] [你好，世界](fg:blue)",
@@ -67,11 +70,31 @@ func NewChainList(chainName string) *NewChainlist {
 
 	})
 
+	em.AddListener("flushChain", func(e Event) {
+		info := "Delete all rules from chain : " + chainName
+		selectBox := SelectBox(info, "flushConfirm", []string{"yes", "no"}, em)
+		ui.Render(selectBox.Widget)
+		ret := string(e.Data)
+		msgBox := MsgBox(ret)
+		ui.Render(msgBox.Widget)
+
+	})
+
+	em.AddListener("flushConfirm", func(e Event) {
+		// TODO : send iptables flush chain except OUTPUT, INPUT, FORWARD
+		// TODO : ret of command
+		ret := string(e.Data)
+		msgBox := MsgBox(ret)
+		ui.Render(msgBox.Widget)
+
+	})
+
 	return &NewChainlist{
-		Widget:    l,
-		Chainlist: chainlist,
-		IsMoving:  false,
-		Em:        em,
+		Widget:     l,
+		Chainlist:  chainlist,
+		IsMoving:   false,
+		Em:         em,
+		ChaineName: chainName,
 	}
 }
 
@@ -92,27 +115,43 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 			moveUp(nc.Chainlist, nc.Widget.SelectedRow+1)
 			nc.Widget.Rows = nc.Chainlist
 		}
+	case "a":
+		showOtherWidget = true
+		newRule := NewRule(nc.ChaineName)
+		state.handlers["newRule"] = newRule
+		state.SetActive("newRule")
+		state.Render()
 	case "e":
 		showOtherWidget = true
 		editRule := EditRule(nc.Chainlist[nc.Widget.SelectedRow])
 		state.handlers["editRule"] = editRule
 		state.SetActive("editRule")
 		state.Render()
-	case "p":
+	case "P":
 		showOtherWidget = true
-		selectBox := SelectBox([]string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}, nc.Em)
+		info := "Set the policy of chain : " + nc.ChaineName
+		selectBox := SelectBox(info, "setPolicy", []string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}, nc.Em)
 		state.handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	case "D":
 		showOtherWidget = true
-		selectBox := SelectBox([]string{"yes", "no"}, nc.Em)
+		info := "Are you sure you want to delete chain : " + nc.ChaineName
+		selectBox := SelectBox(info, "deleteChain", []string{"yes", "no"}, nc.Em)
 		state.handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	case "d":
 		showOtherWidget = true
-		selectBox := SelectBox([]string{"yes", "no"}, nc.Em)
+		info := "Are you sure you want to delete rule : " + strconv.Itoa(nc.Widget.SelectedRow)
+		selectBox := SelectBox(info, "deleteRule", []string{"yes", "no"}, nc.Em)
+		state.handlers["selectBox"] = selectBox
+		state.SetActive("selectBox")
+		state.Render()
+	case "F":
+		showOtherWidget = true
+		info := "Are you sure you want to Flush : " + nc.ChaineName
+		selectBox := SelectBox(info, "flushChain", []string{"yes", "no"}, nc.Em)
 		state.handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()

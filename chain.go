@@ -52,13 +52,9 @@ func Chain() {
 		}
 	}
 
-	newRule := NewRule()
-	newChain := NewChain()
-
-	state.handlers["newRule"] = newRule
-	state.handlers["newChain"] = newChain
-
 	renderTab()
+	newChain := NewChain()
+	state.handlers["newChain"] = newChain
 	ui.Render(header, footer, tabpane)
 
 	uiEvents := ui.PollEvents()
@@ -84,18 +80,23 @@ func Chain() {
 			state.Render()
 			ui.Render(header, footer, tabpane)
 			renderTab()
-		case "a":
-			if isDifferentFromKnownHandlers(state) {
-				state.SetActive("newRule")
-			} else {
-				state.HandleEvent(e, state)
-			}
 		case "c":
 			if isDifferentFromKnownHandlers(state) {
 				state.SetActive("newChain")
 			} else {
 				state.HandleEvent(e, state)
 			}
+		case "E":
+			if isDifferentFromKnownHandlers(state) {
+				if !ContainString(chain[tabpane.ActiveTabIndex], []string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}) {
+					// TODO : from oldchainename and newchainname send iptables command
+					state.SetActive("newChain")
+				}
+			} else {
+				state.HandleEvent(e, state)
+			}
+		case "h":
+			// TODO : help msgbox
 		default:
 			state.HandleEvent(e, state)
 

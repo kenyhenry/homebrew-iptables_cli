@@ -11,7 +11,7 @@ type SelectBoxObject struct {
 	Em          *EventManager
 }
 
-func SelectBox(selectItems []string, em *EventManager) *SelectBoxObject {
+func SelectBox(textInfo string, eventName string, selectItems []string, em *EventManager) *SelectBoxObject {
 	selectBox := widgets.NewList()
 
 	termWidth, termHeight := ui.TerminalDimensions()

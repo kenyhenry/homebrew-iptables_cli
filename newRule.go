@@ -11,7 +11,7 @@ type NewRuleObject struct {
 	BaseTextLengths []int
 }
 
-func NewRule() *NewRuleObject {
+func NewRule(chaineName string) *NewRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
 		"protocol : ",
@@ -26,6 +26,7 @@ func NewRule() *NewRuleObject {
 	msgBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
 	msgBox.Border = true
 	msgBox.TitleStyle.Fg = 3
+	msgBox.Title = chaineName
 	msgBox.WrapText = false
 	msgBox.TextStyle = ui.NewStyle(ui.ColorCyan)
 	msgBox.Rows = ruleDesc

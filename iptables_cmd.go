@@ -18,10 +18,7 @@ type IptablesCmd struct {
 	Jump            string
 }
 
-// TODO : on sending every iptables cmd print return in a msgBox
-// msgBox := MsgBox()
-
-func containString(target string, substring []string) bool {
+func ContainString(target string, substring []string) bool {
 	for _, str := range substring {
 		if strings.Contains(target, str) {
 			return true
@@ -32,8 +29,6 @@ func containString(target string, substring []string) bool {
 
 func generateIptablesArgs(cmd IptablesCmd) []string {
 	var args []string
-
-	// Check each field and append corresponding argument if not empty
 	if cmd.Chain != "" {
 		args = append(args, "-A", cmd.Chain)
 	}
@@ -47,7 +42,7 @@ func generateIptablesArgs(cmd IptablesCmd) []string {
 		args = append(args, "-d", cmd.Destination)
 	}
 	if cmd.Port != "" {
-		args = append(args, "--dport", cmd.Port) // Assuming port is destination port
+		args = append(args, "--dport", cmd.Port)
 	}
 	if cmd.Module != "" {
 		args = append(args, "-m", cmd.Module)
@@ -85,13 +80,8 @@ func IptablesDeleteChain(chainName string) string {
 	return iptablesCmd(option)
 }
 
-func IptablesMapPolicy(chainName string, targetChainName string) string {
-	option := []string{"-A", chainName, "-j", targetChainName}
-	return iptablesCmd(option)
-}
-
-func IptablesSetPolicy(chainName string, policy string) string {
-	option := []string{"-P", chainName, policy}
+func IptablesRenameChain(chainName string, newChainName string) string {
+	option := []string{"-E", chainName, newChainName}
 	return iptablesCmd(option)
 }
 
@@ -109,6 +99,17 @@ func IptablesListChain() []string {
 	return ret
 }
 
+// POLICY
+func IptablesMapPolicy(chainName string, targetChainName string) string {
+	option := []string{"-A", chainName, "-j", targetChainName}
+	return iptablesCmd(option)
+}
+
+func IptablesSetPolicy(chainName string, policy string) string {
+	option := []string{"-P", chainName, policy}
+	return iptablesCmd(option)
+}
+
 // Rule
 func IptablesList(chainName string) []string {
 	option := []string{"-L", chainName}
@@ -117,7 +118,7 @@ func IptablesList(chainName string) []string {
 	var ret []string
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
-		if !containString(line, substring) {
+		if !ContainString(line, substring) {
 			ret = append(ret, line)
 			fmt.Printf(line + "\n")
 		}
@@ -137,7 +138,7 @@ func IptablesGetRule(chainName string, ruleIndex int) string {
 	var rules []string
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
-		if !containString(line, substring) {
+		if !ContainString(line, substring) {
 			rules = append(rules, line)
 		}
 	}
