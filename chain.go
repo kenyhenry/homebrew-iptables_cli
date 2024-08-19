@@ -20,6 +20,23 @@ func Chain() {
 			   I)   P)          T)    A)    aa B)    bb L)       E)       S)    ss     C)   cc L)         I)
 			 I)iiii P)          T)    A)    aa B)bbbbb  L)llllll E)eeeeee  S)ssss       C)ccc  L)llllll I)iiii`
 
+	help := `Helper
+
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+			<a> add new rule on current chain
+	`
+
 	termWidth, termHeight := ui.TerminalDimensions()
 
 	header := widgets.NewParagraph()
@@ -97,6 +114,8 @@ func Chain() {
 			}
 		case "h":
 			// TODO : help msgbox
+			helperBox := Helper(help)
+			ui.Render(helperBox.Widget)
 		default:
 			state.HandleEvent(e, state)
 
