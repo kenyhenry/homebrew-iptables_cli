@@ -13,7 +13,7 @@ func Helper(message string) *HelperObject {
 	msgBox := widgets.NewParagraph()
 
 	termWidth, termHeight := ui.TerminalDimensions()
-	msgBox.SetRect(termWidth/2-25, termHeight/2-10, termWidth/2+25, termHeight/2+10)
+	msgBox.SetRect(termWidth/2-30, termHeight/2-13, termWidth/2+30, termHeight/2+13)
 	msgBox.Border = true
 	msgBox.TitleStyle.Fg = 3
 	msgBox.WrapText = true

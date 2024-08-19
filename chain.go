@@ -22,19 +22,23 @@ func Chain() {
 
 	help := `Helper
 
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
-			<a> add new rule on current chain
+			Rules
+			<a> 			add new rule on current chain
+			<e> 			edit rule selected on current chain
+			<d> 			delete the rule selected on the current chain
+
+			Chain
+			<c> 			add new chain
+			<D> 			delete the current chain
+			<F> 			flush or delete all rule inside of the current chain
+			<E> 			rename the current chain
+			<P> 			set current chain policy only supported ("DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT")
+
+			General
+			<Enter> 		on tape on rule can move rule tape again to valid new rule emplacement
+			<Up & Down> 	to move in the list of rule
+			<Left & Right> 	to navigate into chain
+			<ctrl-c> 		quit iptables_cli
 	`
 
 	termWidth, termHeight := ui.TerminalDimensions()
@@ -45,7 +49,7 @@ func Chain() {
 	header.TextStyle.Fg = ui.ColorGreen
 
 	footer := widgets.NewParagraph()
-	footer.Text = "<a> new rule | <e> edit rule | <c> add chain | <d> delete rule | <D> delete chain | <p> set chain policy | <Enter> to select and move rule up & down | <ctrl-c> quit"
+	footer.Text = "<a> new rule | <e> edit rule | <c> add chain | <d> delete rule | <D> delete chain | <P> set chain policy | <E> rename chain | <F> flush chain | <ctrl-c> quit"
 	footer.SetRect(0, termHeight-3, termWidth, termHeight)
 	footer.Border = true
 	footer.WrapText = true
@@ -73,6 +77,7 @@ func Chain() {
 	newChain := NewChain()
 	state.handlers["newChain"] = newChain
 	ui.Render(header, footer, tabpane)
+	renderTab()
 
 	uiEvents := ui.PollEvents()
 	for {
