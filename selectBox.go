@@ -25,7 +25,7 @@ func SelectBox(textInfo string, eventName string, selectItems []string, em *Even
 
 	paragraph := widgets.NewParagraph()
 	paragraph.Text = textInfo
-	paragraph.SetRect(0, 0, 3, 3) // Set position and size
+	paragraph.SetRect(0, 0, 3, 3)
 	paragraph.Border = true
 
 	grid := ui.NewGrid()
