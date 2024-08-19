@@ -28,11 +28,11 @@ func Chain() {
 	header.TextStyle.Fg = ui.ColorGreen
 
 	footer := widgets.NewParagraph()
-	footer.Text = "<a> new rule | <e> edit rule | <q> quit"
+	footer.Text = "<a> new rule | <e> edit rule | <c> add chain | <d> delete rule | <D> delete chain | <p> set chain policy | <Enter> to select and move rule up & down | <ctrl-c> quit"
 	footer.SetRect(0, termHeight-3, termWidth, termHeight)
 	footer.Border = true
 	footer.WrapText = true
-	footer.TextStyle.Bg = ui.ColorBlue
+	footer.TextStyle.Fg = ui.ColorCyan
 
 	var chain []string
 	tabpane := widgets.NewTabPane(chain...)
