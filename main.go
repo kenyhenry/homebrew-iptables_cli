@@ -58,16 +58,19 @@ func main() {
 	var chain []string
 	tabpane := widgets.NewTabPane(chain...)
 	tabpane.SetRect(0, 10, termWidth, termHeight-3)
+	tabpane.ActiveTabIndex = 0
 	tabpane.Border = true
 
 	state := NewUIState(header, footer, tabpane)
 
 	renderTab := func() {
 		// TODO get rule of chain by sending command iptables -C
-		chain = []string{"pierwszy", "drugi", "trzeci", "żółw", "four", "five"}
+		chain = []string{"pierwszy", "drugi", "trzeci", "żółw", "four", "five", "pierwszy", "drugi", "trzeci", "żółw", "four", "five", "pierwszy", "drugi", "trzeci", "żółw", "four", "five", "pierwszy", "drugi", "trzeci", "żółw", "four", "five"}
 		tabpane.TabNames = chain
 		if tabpane.ActiveTabIndex >= 0 && tabpane.ActiveTabIndex < len(chain) {
 			chainlist := NewChainList(chain[tabpane.ActiveTabIndex])
+			// Work arround : on chain overflow terminal, tabpane is not extend
+			tabpane.Title = chain[tabpane.ActiveTabIndex]
 			state.handlers["chainList"] = chainlist
 			state.SetActive("chainList")
 		}
@@ -92,12 +95,14 @@ func main() {
 			renderTab()
 		case "<Left>":
 			tabpane.FocusLeft()
+			renderTab()
 			ui.Clear()
 			state.Render()
 			ui.Render(header, footer, tabpane)
 			renderTab()
 		case "<Right>":
 			tabpane.FocusRight()
+			renderTab()
 			ui.Clear()
 			state.Render()
 			ui.Render(header, footer, tabpane)
