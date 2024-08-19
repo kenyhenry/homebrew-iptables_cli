@@ -6,27 +6,52 @@ import (
 )
 
 type SelectBoxObject struct {
-	Widget      *widgets.List
+	Widget      *ui.Grid
 	SelectItems []string
 	Em          *EventManager
+	EventName   string
 }
 
 func SelectBox(textInfo string, eventName string, selectItems []string, em *EventManager) *SelectBoxObject {
 	selectBox := widgets.NewList()
 
 	termWidth, termHeight := ui.TerminalDimensions()
-	selectBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
+	selectBox.SetRect(termWidth/2-5, termHeight/2-5, termWidth/2+5, termHeight/2+5)
 	selectBox.Border = true
 	selectBox.TitleStyle.Fg = 3
-	selectBox.WrapText = false
+	selectBox.WrapText = true
 	selectBox.TextStyle = ui.NewStyle(ui.ColorCyan)
 	selectBox.Rows = selectItems
 
+	paragraph := widgets.NewParagraph()
+	paragraph.Text = textInfo
+	paragraph.SetRect(0, 0, 3, 3) // Set position and size
+	paragraph.Border = true
+
+	grid := ui.NewGrid()
+	grid.SetRect(termWidth/2-20, termHeight/2-10, termWidth/2+20, termHeight/2+10)
+	grid.Set(
+		ui.NewRow(0.2, paragraph),
+		ui.NewRow(0.8, selectBox),
+	)
+
 	return &SelectBoxObject{
-		Widget:      selectBox,
+		Widget:      grid,
 		SelectItems: selectItems,
 		Em:          em,
+		EventName:   eventName,
 	}
+}
+
+func getListItem(grid *ui.Grid) *widgets.List {
+	gridItem := grid.Items[len(grid.Items)-1]
+	if gridItem.IsLeaf {
+		widget, ok := gridItem.Entry.(*widgets.List)
+		if ok {
+			return widget
+		}
+	}
+	return widgets.NewList()
 }
 
 func (nc *SelectBoxObject) HandleEvent(e ui.Event, state *UIState) {
@@ -39,15 +64,19 @@ func (nc *SelectBoxObject) HandleEvent(e ui.Event, state *UIState) {
 		ui.Clear()
 		ui.Render(state.header, state.footer, state.tabpane)
 		state.SetActive("chainList")
-		nc.Em.Emit(Event{Name: "deleteChain", Data: nc.SelectItems[nc.Widget.SelectedRow]})
+		list := getListItem(nc.Widget)
+		nc.Em.Emit(Event{Name: "deleteChain", Data: nc.SelectItems[list.SelectedRow]})
 		// time.Sleep(time.Second)
 		// TODO should send to widget the result
 	case "<Down>":
-		nc.Widget.ScrollDown()
+		list := getListItem(nc.Widget)
+		list.ScrollDown()
 	case "<Up>":
-		nc.Widget.ScrollUp()
+		list := getListItem(nc.Widget)
+		list.ScrollUp()
 	}
-	nc.Widget.Rows = nc.SelectItems
+	list := getListItem(nc.Widget)
+	list.Rows = nc.SelectItems
 	if !showOtherWidget {
 		ui.Render(nc.Widget)
 	}

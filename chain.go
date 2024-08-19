@@ -118,7 +118,6 @@ func Chain() {
 				state.HandleEvent(e, state)
 			}
 		case "h":
-			// TODO : help msgbox
 			helperBox := Helper(help)
 			ui.Render(helperBox.Widget)
 		default:
