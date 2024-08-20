@@ -2,6 +2,7 @@ package main
 
 import (
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -32,6 +33,92 @@ func ContainString(target string, substring []string) bool {
 	return false
 }
 
+func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
+	var cmd IptablesCmd
+
+	parts := strings.Fields(line)
+
+	protocol := parts[3]
+	sourceIP := parts[7]
+	destIP := parts[8]
+	ifaceIn := parts[5]
+	ifaceOut := parts[6]
+	args := parts[9:]
+	jump := parts[2]
+
+	reLog := regexp.MustCompile(`^LOG\s+.*\s+prefix\s+"([^"]+)"`)
+
+	// TODO : handle -t table arg in iptables
+	if protocol != "all" {
+		cmd.Protocol = protocol
+	}
+
+	if sourceIP != "0.0.0.0/0" {
+		cmd.Source = sourceIP
+	}
+
+	if destIP != "0.0.0.0/0" {
+		cmd.Destination = destIP
+	}
+
+	if ifaceIn != "*" {
+		cmd.InIface = ifaceIn
+	}
+
+	if ifaceOut != "*" {
+		cmd.OutIface = ifaceOut
+	}
+
+	for _, part := range args {
+		// TODO : handle all modules
+		if strings.HasPrefix(part, "icmptype") {
+			icmp := strings.TrimPrefix(part, "icmptype")
+			cmd.Module = "icmp"
+			cmd.ModuleArg = "--icmp-type " + icmp
+		}
+		if strings.HasPrefix(part, "dpt:") {
+			port := strings.TrimPrefix(part, "dpt:")
+			cmd.DPort = port
+		}
+		if strings.HasPrefix(part, "spt:") {
+			sport := strings.TrimPrefix(part, "spt:")
+			cmd.SPort = sport
+		}
+		if strings.HasPrefix(part, "cstate") {
+			cstate := strings.TrimPrefix(part, "cstate")
+			cmd.ConnectionState = cstate
+		}
+	}
+	if logMatch := reLog.FindStringSubmatch(line); len(logMatch) > 1 {
+		logPrefix := logMatch[1]
+		cmd.Jump = "LOG"
+		cmd.JumpArg = "--log-prefix " + logPrefix
+	} else {
+		cmd.Jump = jump
+	}
+
+	return cmd
+}
+
+func ArraytToCmd(chain string, rules []string, base []int) IptablesCmd {
+	return IptablesCmd{
+		Chain:           chain,
+		Table:           rules[0][base[0]:],
+		Protocol:        rules[1][base[1]:],
+		DPort:           rules[2][base[2]:],
+		SPort:           rules[3][base[3]:],
+		Source:          rules[4][base[4]:],
+		Destination:     rules[5][base[5]:],
+		Module:          rules[6][base[6]:],
+		ModuleArg:       rules[7][base[7]:],
+		ConnectionState: rules[8][base[8]:],
+		Jump:            rules[9][base[9]:],
+		JumpArg:         rules[10][base[10]:],
+		InIface:         rules[11][base[11]:],
+		OutIface:        rules[12][base[12]:],
+	}
+}
+
 func generateIptablesArgs(cmd IptablesCmd) []string {
 	var args []string
 	if cmd.Chain != "" {
@@ -39,6 +126,12 @@ func generateIptablesArgs(cmd IptablesCmd) []string {
 	}
 	if cmd.Table != "" {
 		args = append(args, "-t", cmd.Table)
+	}
+	if cmd.InIface != "" {
+		args = append(args, "-i", cmd.InIface)
+	}
+	if cmd.OutIface != "" {
+		args = append(args, "-o", cmd.OutIface)
 	}
 	if cmd.Protocol != "" {
 		args = append(args, "-p", cmd.Protocol)
@@ -59,7 +152,7 @@ func generateIptablesArgs(cmd IptablesCmd) []string {
 		args = append(args, "-m", cmd.Module)
 	}
 	if cmd.ModuleArg != "" {
-		args = append(args, "-m", cmd.ModuleArg)
+		args = append(args, strings.Split(cmd.ModuleArg, " ")...)
 	}
 	if cmd.ConnectionState != "" {
 		args = append(args, "--ctstate", cmd.ConnectionState)
@@ -69,12 +162,6 @@ func generateIptablesArgs(cmd IptablesCmd) []string {
 	}
 	if cmd.JumpArg != "" {
 		args = append(args, strings.Split(cmd.JumpArg, " ")...)
-	}
-	if cmd.InIface != "" {
-		args = append(args, "-i", cmd.InIface)
-	}
-	if cmd.OutIface != "" {
-		args = append(args, "-o", cmd.OutIface)
 	}
 	return args
 }
@@ -137,7 +224,7 @@ func IptablesSetPolicy(chainName string, policy string) (string, error) {
 
 // Rule
 func IptablesList(chainName string) ([]string, string, error) {
-	option := []string{"-L", chainName}
+	option := []string{"-L", chainName, "-n", "-v"}
 	substring := []string{"target", "prot", "opt", "source", "destination", "Chain"}
 	result, err := iptablesCmd(option)
 	var ret []string

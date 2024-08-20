@@ -110,22 +110,3 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 func (nr *EditRuleObject) Render() {
 	ui.Render(nr.Widget)
 }
-
-func ArraytToCmd(chain string, rules []string, base []int) IptablesCmd {
-	return IptablesCmd{
-		Chain:           chain,
-		Table:           rules[0][base[0]:],
-		Protocol:        rules[1][base[1]:],
-		DPort:           rules[2][base[2]:],
-		SPort:           rules[3][base[3]:],
-		Source:          rules[4][base[4]:],
-		Destination:     rules[5][base[5]:],
-		Module:          rules[6][base[6]:],
-		ModuleArg:       rules[7][base[7]:],
-		ConnectionState: rules[8][base[8]:],
-		Jump:            rules[9][base[9]:],
-		JumpArg:         rules[10][base[10]:],
-		InIface:         rules[11][base[11]:],
-		OutIface:        rules[12][base[12]:],
-	}
-}
