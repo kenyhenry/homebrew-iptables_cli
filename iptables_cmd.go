@@ -33,6 +33,21 @@ func ContainString(target string, substring []string) bool {
 	return false
 }
 
+func getElement(str string, keyword string) string {
+	start := strings.Index(str, keyword)
+	if start != -1 {
+		start += len(keyword)
+		end := strings.Index(str[start:], " ")
+		if end == -1 {
+			end = len(str)
+		} else {
+			end += start
+		}
+		return str[start:end]
+	}
+	return ""
+}
+
 func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 	var cmd IptablesCmd
 
@@ -74,16 +89,17 @@ func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 		cmd.Module = "icmp"
 		cmd.ModuleArg = "--icmp-type " + icmp
 	}
+
 	if strings.HasPrefix(part, "dpt:") {
-		port := strings.TrimPrefix(part, "dpt:")
+		port := getElement(part, "dpt:")
 		cmd.DPort = port
 	}
 	if strings.HasPrefix(part, "spt:") {
-		sport := strings.TrimPrefix(part, "spt:")
+		sport := getElement(part, "spt:")
 		cmd.SPort = sport
 	}
 	if strings.HasPrefix(part, "ctstate ") {
-		cstate := strings.TrimPrefix(part, "ctstate ")
+		cstate := getElement(part, "ctstate ")
 		cmd.ConnectionState = cstate
 	}
 
