@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
@@ -10,22 +8,27 @@ import (
 type EditRuleObject struct {
 	Widget          *widgets.List
 	RuleDesc        []string
-	IsMoving        bool
 	BaseTextLengths []int
+	ChainName       string
 }
 
-func EditRule(rule string) *EditRuleObject {
+func EditRule(chainName string, rule string) *EditRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
+		"table : ",
 		"protocol : ",
-		"direction : ",
-		"port : ",
+		"source port : ",
+		"dest port : ",
+		"source : ",
+		"destination : ",
 		"module : ",
+		"module arg : ",
 		"connection states : ",
 		"jump : ",
+		"log prefix : ",
+		"in iface : ",
+		"out iface : ",
 	}
-
-	ruleSplit := strings.Fields(rule)
 
 	termWidth, termHeight := ui.TerminalDimensions()
 	msgBox.SetRect(termWidth/2-25, termHeight/2-5, termWidth/2+25, termHeight/2+5)
@@ -40,18 +43,18 @@ func EditRule(rule string) *EditRuleObject {
 		baseTextLengths[i] = len(text)
 	}
 
-	for i := range ruleDesc {
-		// TODO : make ruleSplit match with ruleDesc
-		if i < len(ruleSplit) {
-			ruleDesc[i] += ruleSplit[i]
-		}
-	}
+	// for i := range ruleDesc {
+	// 	//  : make ruleSplit match with ruleDesc
+	// 	if i < len(ruleSplit) {
+	// 		ruleDesc[i] += ruleSplit[i]
+	// 	}
+	// }
 
 	return &EditRuleObject{
 		Widget:          msgBox,
 		RuleDesc:        ruleDesc,
-		IsMoving:        false,
 		BaseTextLengths: baseTextLengths,
+		ChainName:       chainName,
 	}
 }
 
@@ -64,15 +67,24 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	case "<Enter>":
 		showOtherWidget = true
 		// TODO : send command to edit rule
+		ret, err := IptablesAddRule(ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
+		if err != nil {
+			msgBox := MsgBox(ret)
+			state.handlers["msgBox"] = msgBox
+			state.SetActive("msgBox")
+			state.Render()
+		} else {
+			ret2, err2 := IptablesAddRule(ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
+			if err2 != nil {
+				msgBox := MsgBox(ret2)
+				state.handlers["msgBox"] = msgBox
+				state.SetActive("msgBox")
+				state.Render()
+			}
+		}
 		ui.Clear()
 		ui.Render(state.header, state.footer, state.tabpane)
 		state.SetActive("chainList")
-		// TODO: ret of command
-		ret := "test"
-		msgBox := MsgBox(ret)
-		state.handlers["msgBox"] = msgBox
-		state.SetActive("msgBox")
-		state.Render()
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":
@@ -95,4 +107,23 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 
 func (nr *EditRuleObject) Render() {
 	ui.Render(nr.Widget)
+}
+
+func ArraytToCmd(chain string, rules []string, base []int) IptablesCmd {
+	return IptablesCmd{
+		Chain:           chain,
+		Table:           rules[0][base[0]:],
+		Protocol:        rules[1][base[1]:],
+		DPort:           rules[2][base[2]:],
+		SPort:           rules[3][base[3]:],
+		Source:          rules[4][base[4]:],
+		Destination:     rules[5][base[5]:],
+		Module:          rules[6][base[6]:],
+		ModuleArg:       rules[7][base[7]:],
+		ConnectionState: rules[8][base[8]:],
+		Jump:            rules[9][base[9]:],
+		LogPrefix:       rules[10][base[10]:],
+		InIface:         rules[11][base[11]:],
+		OutIface:        rules[12][base[12]:],
+	}
 }

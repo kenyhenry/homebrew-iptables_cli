@@ -9,17 +9,25 @@ type NewRuleObject struct {
 	Widget          *widgets.List
 	RuleDesc        []string
 	BaseTextLengths []int
+	ChainName       string
 }
 
 func NewRule(chaineName string) *NewRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
+		"table : ",
 		"protocol : ",
-		"direction : ",
-		"port : ",
+		"source port : ",
+		"dest port : ",
+		"source : ",
+		"destination : ",
 		"module : ",
+		"module arg : ",
 		"connection states : ",
 		"jump : ",
+		"log prefix : ",
+		"in iface : ",
+		"out iface : ",
 	}
 
 	termWidth, termHeight := ui.TerminalDimensions()
@@ -40,6 +48,7 @@ func NewRule(chaineName string) *NewRuleObject {
 		Widget:          msgBox,
 		RuleDesc:        ruleDesc,
 		BaseTextLengths: baseTextLengths,
+		ChainName:       chaineName,
 	}
 }
 
@@ -51,12 +60,10 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	switch e.ID {
 	case "<Enter>":
 		showOtherWidget = true
-		// TODO : send command to add new rule
+		ret, _ := IptablesAddRule(ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
 		ui.Clear()
 		ui.Render(state.header, state.footer, state.tabpane)
 		state.SetActive("chainList")
-		// TODO: ret of command
-		ret := "test"
 		msgBox := MsgBox(ret)
 		state.handlers["msgBox"] = msgBox
 		state.SetActive("msgBox")

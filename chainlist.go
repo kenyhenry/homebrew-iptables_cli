@@ -15,22 +15,8 @@ type NewChainlist struct {
 	ChaineName string
 }
 
-func NewChainList(chainName string) *NewChainlist {
-	// TODO send iptables command to get iptables rule and screen
-	chainlist := []string{
-		"[0] github.com/gizak/termui/v3",
-		"[1] [你好，世界](fg:blue)",
-		"[2] [こんにちは世界](fg:red)",
-		"[3] [color](fg:white,bg:green) output",
-		"[4] output.go",
-		"[5] random_out.go",
-		"[6] dashboard.go",
-		"[7] foo",
-		"[8] bar",
-		"[9] baz",
-	}
-
-	em := NewEventManager()
+func NewChainList(chainName string, em *EventManager) *NewChainlist {
+	chainlist, _, _ := IptablesList(chainName)
 
 	l := widgets.NewList()
 	l.Rows = chainlist
@@ -39,53 +25,10 @@ func NewChainList(chainName string) *NewChainlist {
 	termWidth, termHeight := ui.TerminalDimensions()
 	l.SetRect(1, 12, termWidth-1, termHeight-4)
 
-	em.AddListener("deleteChain", func(e Event) {
-		// TODO : delete chain selected "chainName"
-		// TODO : ret of command
-		if e.Data == "yes" {
-			ret := string(e.Data)
-			msgBox := MsgBox(ret)
-			ui.Render(msgBox.Widget)
-		}
-
-	})
-
 	em.AddListener("deleteRule", func(e Event) {
-		// TODO : delete rule selected chainlist[l.SelectedRow]
-		// TODO : ret of command
 		if e.Data == "yes" {
-			ret := string(e.Data)
-			msgBox := MsgBox(ret)
-			ui.Render(msgBox.Widget)
+			IptablesDeleteRule(chainName, l.SelectedRow)
 		}
-
-	})
-
-	em.AddListener("setPolicy", func(e Event) {
-		// TODO : set chain policy as selectBox to e.Data
-		// TODO : ret of command
-		ret := string(e.Data)
-		msgBox := MsgBox(ret)
-		ui.Render(msgBox.Widget)
-
-	})
-
-	em.AddListener("flushChain", func(e Event) {
-		info := "Delete all rules from chain : " + chainName
-		selectBox := SelectBox(info, "flushConfirm", []string{"yes", "no"}, em)
-		ui.Render(selectBox.Widget)
-		ret := string(e.Data)
-		msgBox := MsgBox(ret)
-		ui.Render(msgBox.Widget)
-
-	})
-
-	em.AddListener("flushConfirm", func(e Event) {
-		// TODO : send iptables flush chain except OUTPUT, INPUT, FORWARD
-		// TODO : ret of command
-		ret := string(e.Data)
-		msgBox := MsgBox(ret)
-		ui.Render(msgBox.Widget)
 
 	})
 
@@ -103,6 +46,7 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 	switch e.ID {
 	case "<Enter>":
 		nc.IsMoving = !nc.IsMoving
+		// TODO : on enter and rule move insert rule at selected and remove rule at old place
 	case "<Down>":
 		nc.Widget.ScrollDown()
 		if nc.IsMoving {
@@ -123,7 +67,7 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 		state.Render()
 	case "e":
 		showOtherWidget = true
-		editRule := EditRule(nc.Chainlist[nc.Widget.SelectedRow])
+		editRule := EditRule(nc.ChaineName, nc.Chainlist[nc.Widget.SelectedRow])
 		state.handlers["editRule"] = editRule
 		state.SetActive("editRule")
 		state.Render()

@@ -61,14 +61,12 @@ func (nc *SelectBoxObject) HandleEvent(e ui.Event, state *UIState) {
 	switch e.ID {
 	case "<Enter>":
 		showOtherWidget = true
-		// TODO : send command to add new rule
 		ui.Clear()
 		ui.Render(state.header, state.footer, state.tabpane)
 		state.SetActive("chainList")
 		list := getListItem(nc.Widget)
-		nc.Em.Emit(Event{Name: "deleteChain", Data: nc.SelectItems[list.SelectedRow]})
+		nc.Em.Emit(Event{Name: nc.EventName, Data: nc.SelectItems[list.SelectedRow]})
 		// time.Sleep(time.Second)
-		// TODO should send to widget the result
 	case "<Down>":
 		list := getListItem(nc.Widget)
 		list.ScrollDown()

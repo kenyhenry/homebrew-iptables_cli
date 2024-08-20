@@ -34,10 +34,8 @@ func (nc *NewChainObject) HandleEvent(e ui.Event, state *UIState) {
 	switch e.ID {
 	case "<Enter>":
 		showOtherWidget = true
-		// TODO : send command to add new chain
-		// TODO: ret of command
-		ret := "test"
-		msgBox := MsgBox(ret)
+		out, _ := IptablesAddChain(nc.Widget.Text[len(nc.BaseText):])
+		msgBox := MsgBox(out)
 		state.handlers["msgBox"] = msgBox
 		state.SetActive("msgBox")
 		state.Render()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -24,7 +25,7 @@ func main() {
 
 			Rules
 			<a> 			add new rule on current chain
-			<e> 			edit rule selected on current chain
+			<e> 			[TODO] edit rule selected on current chain
 			<d> 			delete the rule selected on the current chain
 
 			Chain
@@ -36,7 +37,7 @@ func main() {
 
 			General
 			<Enter> 		on tape on rule can move rule tape again to valid new rule emplacement
-			<Up & Down> 	to move in the list of rule
+			<Up & Down> 	[TODO] to move in the list of rule
 			<Left & Right> 	to navigate into chain
 			<ctrl-c> 		quit iptables_cli
 	`
@@ -49,7 +50,7 @@ func main() {
 	header.TextStyle.Fg = ui.ColorGreen
 
 	footer := widgets.NewParagraph()
-	footer.Text = "<a> new rule | <e> edit rule | <c> add chain | <d> delete rule | <D> delete chain | <P> set chain policy | <E> rename chain | <F> flush chain | <ctrl-c> quit"
+	footer.Text = "<a> new rule | <c> add chain | <d> delete rule | <D> delete chain | <P> set chain policy | <E> rename chain | <F> flush chain | <ctrl-c> quit"
 	footer.SetRect(0, termHeight-3, termWidth, termHeight)
 	footer.Border = true
 	footer.WrapText = true
@@ -61,14 +62,57 @@ func main() {
 	tabpane.ActiveTabIndex = 0
 	tabpane.Border = true
 
+	em := NewEventManager()
+
 	state := NewUIState(header, footer, tabpane)
 
+	em.AddListener("deleteChain", func(e Event) {
+		if e.Data == "yes" {
+			out, _ := IptablesDeleteChain(chain[tabpane.ActiveTabIndex])
+			msgBox := MsgBox(out)
+			state.handlers["msgBox"] = msgBox
+			state.SetActive("msgBox")
+			state.Render()
+		}
+
+	})
+
+	em.AddListener("setPolicy", func(e Event) {
+		out, _ := IptablesSetPolicy(chain[tabpane.ActiveTabIndex], e.Data)
+		msgBox := MsgBox(out)
+		state.handlers["msgBox"] = msgBox
+		state.SetActive("msgBox")
+		state.Render()
+
+	})
+
+	em.AddListener("flushChain", func(e Event) {
+		info := "Delete all rules from chain : " // + chainName
+		selectBox := SelectBox(info, "flushConfirm", []string{"yes", "no"}, em)
+		state.handlers["selectBox"] = selectBox
+		state.SetActive("selectBox")
+		state.Render()
+	})
+
+	em.AddListener("flushConfirm", func(e Event) {
+		if e.Data == "yes" {
+			out, _ := IptablesFlushChain(chain[tabpane.ActiveTabIndex])
+			msgBox := MsgBox(out)
+			state.handlers["msgBox"] = msgBox
+			state.SetActive("msgBox")
+			state.Render()
+		}
+	})
+
 	renderTab := func() {
-		// TODO get rule of chain by sending command iptables -C
-		chain = []string{"pierwszy", "drugi", "trzeci", "żółw", "four", "five", "pierwszy", "drugi", "trzeci", "żółw", "four", "five", "pierwszy", "drugi", "trzeci", "żółw", "four", "five", "pierwszy", "drugi", "trzeci", "żółw", "four", "five"}
+		chain, _ = IptablesListChain()
+		for i, item := range chain {
+			parts := strings.Split(item, " ")
+			chain[i] = parts[1]
+		}
 		tabpane.TabNames = chain
 		if tabpane.ActiveTabIndex >= 0 && tabpane.ActiveTabIndex < len(chain) {
-			chainlist := NewChainList(chain[tabpane.ActiveTabIndex])
+			chainlist := NewChainList(chain[tabpane.ActiveTabIndex], em)
 			// Work arround : on chain overflow terminal, tabpane is not extend
 			tabpane.Title = chain[tabpane.ActiveTabIndex]
 			state.handlers["chainList"] = chainlist
@@ -91,6 +135,9 @@ func main() {
 		case "<C-c>":
 			return
 		case "<Escape>":
+			renderTab()
+			ui.Clear()
+			state.Render()
 			ui.Render(header, footer, tabpane)
 			renderTab()
 		case "<Left>":
@@ -116,7 +163,6 @@ func main() {
 		case "E":
 			if isDifferentFromKnownHandlers(state) {
 				if !ContainString(chain[tabpane.ActiveTabIndex], []string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}) {
-					// TODO : from oldchainename and newchainname send iptables command
 					state.SetActive("newChain")
 				}
 			} else {
