@@ -43,10 +43,7 @@ func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 	destIP := parts[8]
 	ifaceIn := parts[5]
 	ifaceOut := parts[6]
-	args := parts[9:]
 	jump := parts[2]
-
-	reLog := regexp.MustCompile(`^LOG\s+.*\s+prefix\s+"([^"]+)"`)
 
 	// TODO : handle -t table arg in iptables
 	if protocol != "all" {
@@ -69,30 +66,36 @@ func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 		cmd.OutIface = ifaceOut
 	}
 
-	for _, part := range args {
-		// TODO : handle all modules
-		if strings.HasPrefix(part, "icmptype") {
-			icmp := strings.TrimPrefix(part, "icmptype")
-			cmd.Module = "icmp"
-			cmd.ModuleArg = "--icmp-type " + icmp
-		}
-		if strings.HasPrefix(part, "dpt:") {
-			port := strings.TrimPrefix(part, "dpt:")
-			cmd.DPort = port
-		}
-		if strings.HasPrefix(part, "spt:") {
-			sport := strings.TrimPrefix(part, "spt:")
-			cmd.SPort = sport
-		}
-		if strings.HasPrefix(part, "cstate") {
-			cstate := strings.TrimPrefix(part, "cstate")
-			cmd.ConnectionState = cstate
-		}
+	part := strings.Join(parts[9:], " ")
+
+	// TODO : handle all modules
+	if strings.HasPrefix(part, "icmptype") {
+		icmp := strings.TrimPrefix(part, "icmptype ")
+		cmd.Module = "icmp"
+		cmd.ModuleArg = "--icmp-type " + icmp
 	}
-	if logMatch := reLog.FindStringSubmatch(line); len(logMatch) > 1 {
-		logPrefix := logMatch[1]
+	if strings.HasPrefix(part, "dpt:") {
+		port := strings.TrimPrefix(part, "dpt:")
+		cmd.DPort = port
+	}
+	if strings.HasPrefix(part, "spt:") {
+		sport := strings.TrimPrefix(part, "spt:")
+		cmd.SPort = sport
+	}
+	if strings.HasPrefix(part, "ctstate ") {
+		cstate := strings.TrimPrefix(part, "ctstate ")
+		cmd.ConnectionState = cstate
+	}
+
+	re := regexp.MustCompile(`"([^"]+)"`)
+	if strings.HasPrefix(part, "LOG") {
 		cmd.Jump = "LOG"
-		cmd.JumpArg = "--log-prefix " + logPrefix
+		var logPrefix string
+		matches := re.FindAllStringSubmatch(part, -1)
+		for _, match := range matches {
+			logPrefix = match[1]
+		}
+		cmd.JumpArg = "--log-prefix " + "\"" + logPrefix + "\""
 	} else {
 		cmd.Jump = jump
 	}

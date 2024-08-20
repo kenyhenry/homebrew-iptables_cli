@@ -43,12 +43,20 @@ func EditRule(chainName string, rule string) *EditRuleObject {
 		baseTextLengths[i] = len(text)
 	}
 
-	// for i := range ruleDesc {
-	// 	//  : make ruleSplit match with ruleDesc
-	// 	if i < len(ruleSplit) {
-	// 		ruleDesc[i] += ruleSplit[i]
-	// 	}
-	// }
+	cmd := ExtractAndGenerateCommands(rule, chainName)
+	ruleDesc[0] += cmd.Table
+	ruleDesc[1] += cmd.Protocol
+	ruleDesc[2] += cmd.SPort
+	ruleDesc[3] += cmd.DPort
+	ruleDesc[4] += cmd.Source
+	ruleDesc[5] += cmd.Destination
+	ruleDesc[6] += cmd.Module
+	ruleDesc[7] += cmd.ModuleArg
+	ruleDesc[8] += cmd.ConnectionState
+	ruleDesc[9] += cmd.Jump
+	ruleDesc[10] += cmd.JumpArg
+	ruleDesc[11] += cmd.InIface
+	ruleDesc[12] += cmd.OutIface
 
 	return &EditRuleObject{
 		Widget:          msgBox,
