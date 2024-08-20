@@ -84,27 +84,28 @@ func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 	part := strings.Join(parts[9:], " ")
 
 	// TODO : handle all modules
-	if strings.HasPrefix(part, "icmptype") {
+	if strings.Contains(part, "icmptype") {
 		icmp := strings.TrimPrefix(part, "icmptype ")
 		cmd.Module = "icmp"
 		cmd.ModuleArg = "--icmp-type " + icmp
 	}
 
-	if strings.HasPrefix(part, "dpt:") {
+	cmd.Table = getElement(part, "spt:")
+	if strings.Contains(part, "dpt:") {
 		port := getElement(part, "dpt:")
 		cmd.DPort = port
 	}
-	if strings.HasPrefix(part, "spt:") {
+	if strings.Contains(part, "spt:") {
 		sport := getElement(part, "spt:")
 		cmd.SPort = sport
 	}
-	if strings.HasPrefix(part, "ctstate ") {
+	if strings.Contains(part, "ctstate ") {
 		cstate := getElement(part, "ctstate ")
 		cmd.ConnectionState = cstate
 	}
 
 	re := regexp.MustCompile(`"([^"]+)"`)
-	if strings.HasPrefix(part, "LOG") {
+	if strings.Contains(part, "LOG") {
 		cmd.Jump = "LOG"
 		var logPrefix string
 		matches := re.FindAllStringSubmatch(part, -1)
