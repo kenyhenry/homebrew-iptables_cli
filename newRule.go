@@ -25,7 +25,7 @@ func NewRule(chaineName string) *NewRuleObject {
 		"module arg : ",
 		"connection states : ",
 		"jump : ",
-		"log prefix : ",
+		"jump arg : ",
 		"in iface : ",
 		"out iface : ",
 	}
@@ -80,6 +80,8 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
 		if len(e.ID) == 1 {
 			nc.RuleDesc[currentRow] += e.ID
 		}
+	case "<Space>":
+		nc.RuleDesc[currentRow] += " "
 	default:
 		if len(e.ID) == 1 {
 			nc.RuleDesc[currentRow] += e.ID

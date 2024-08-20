@@ -25,7 +25,7 @@ func EditRule(chainName string, rule string) *EditRuleObject {
 		"module arg : ",
 		"connection states : ",
 		"jump : ",
-		"log prefix : ",
+		"jump args : ",
 		"in iface : ",
 		"out iface : ",
 	}
@@ -93,6 +93,8 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 		if len(nc.RuleDesc[currentRow]) > baseTextLength {
 			nc.RuleDesc[currentRow] = nc.RuleDesc[currentRow][:len(nc.RuleDesc[currentRow])-1]
 		}
+	case "<Space>":
+		nc.RuleDesc[currentRow] += " "
 	default:
 		if len(e.ID) == 1 {
 			nc.RuleDesc[currentRow] += e.ID
@@ -122,7 +124,7 @@ func ArraytToCmd(chain string, rules []string, base []int) IptablesCmd {
 		ModuleArg:       rules[7][base[7]:],
 		ConnectionState: rules[8][base[8]:],
 		Jump:            rules[9][base[9]:],
-		LogPrefix:       rules[10][base[10]:],
+		JumpArg:         rules[10][base[10]:],
 		InIface:         rules[11][base[11]:],
 		OutIface:        rules[12][base[12]:],
 	}

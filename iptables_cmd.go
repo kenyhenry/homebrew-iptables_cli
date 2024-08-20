@@ -18,7 +18,7 @@ type IptablesCmd struct {
 	ModuleArg       string
 	ConnectionState string
 	Jump            string
-	LogPrefix       string
+	JumpArg         string
 	InIface         string
 	OutIface        string
 }
@@ -67,14 +67,14 @@ func generateIptablesArgs(cmd IptablesCmd) []string {
 	if cmd.Jump != "" {
 		args = append(args, "-j", cmd.Jump)
 	}
-	if cmd.LogPrefix != "" {
-		args = append(args, "-j", cmd.LogPrefix)
+	if cmd.JumpArg != "" {
+		args = append(args, strings.Split(cmd.JumpArg, " ")...)
 	}
 	if cmd.InIface != "" {
-		args = append(args, "-j", cmd.InIface)
+		args = append(args, "-i", cmd.InIface)
 	}
 	if cmd.OutIface != "" {
-		args = append(args, "-j", cmd.OutIface)
+		args = append(args, "-o", cmd.OutIface)
 	}
 	return args
 }
