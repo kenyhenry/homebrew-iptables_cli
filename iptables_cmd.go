@@ -9,6 +9,7 @@ import (
 
 type IptablesCmd struct {
 	Chain           string
+	Pos             string
 	Table           string
 	Protocol        string
 	SPort           string
@@ -50,15 +51,24 @@ func getElement(str string, keyword string) string {
 
 func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 	var cmd IptablesCmd
-
+	cmd.Chain = chaineName
 	parts := strings.Fields(line)
 
-	protocol := parts[3]
-	sourceIP := parts[7]
-	destIP := parts[8]
-	ifaceIn := parts[5]
-	ifaceOut := parts[6]
-	jump := parts[2]
+	safety := 0
+	if parts[3] == "--" {
+		safety = 1
+	}
+
+	protocol := parts[3-safety]
+	sourceIP := parts[7-safety]
+	destIP := parts[8-safety]
+	ifaceIn := parts[5-safety]
+	ifaceOut := parts[6-safety]
+
+	jump := parts[2-safety]
+	if safety != 0 {
+		jump = ""
+	}
 
 	// TODO : handle -t table arg in iptables
 	if protocol != "all" {
@@ -81,7 +91,7 @@ func ExtractAndGenerateCommands(line string, chaineName string) IptablesCmd {
 		cmd.OutIface = ifaceOut
 	}
 
-	part := strings.Join(parts[9:], " ")
+	part := strings.Join(parts[9-safety:], " ")
 
 	// TODO : handle all modules
 	if strings.Contains(part, "icmptype") {
@@ -142,7 +152,11 @@ func ArraytToCmd(chain string, rules []string, base []int) IptablesCmd {
 func generateIptablesArgs(cmd IptablesCmd) []string {
 	var args []string
 	if cmd.Chain != "" {
-		args = append(args, "-A", cmd.Chain)
+		if len(cmd.Pos) == 0 {
+			args = append(args, "-A", cmd.Chain)
+		} else {
+			args = append(args, "-I", cmd.Chain, cmd.Pos)
+		}
 	}
 	if cmd.Table != "" {
 		args = append(args, "-t", cmd.Table)
@@ -224,7 +238,6 @@ func IptablesListChain() ([]string, error) {
 		for _, line := range lines {
 			if strings.HasPrefix(line, "Chain") {
 				ret = append(ret, line)
-				// fmt.Printf(line + "\n")
 			}
 		}
 	}
@@ -253,7 +266,6 @@ func IptablesList(chainName string) ([]string, string, error) {
 		for _, line := range lines {
 			if !ContainString(line, substring) {
 				ret = append(ret, line)
-				// fmt.Printf(line + "\n")
 			}
 		}
 	} else {
@@ -264,11 +276,6 @@ func IptablesList(chainName string) ([]string, string, error) {
 }
 
 func IptablesAddRule(cmd IptablesCmd) (string, error) {
-	option := generateIptablesArgs(cmd)
-	return iptablesCmd(option)
-}
-
-func IptablesInsertRule(pos int, cmd IptablesCmd) (string, error) {
 	option := generateIptablesArgs(cmd)
 	return iptablesCmd(option)
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 )
@@ -10,9 +12,11 @@ type EditRuleObject struct {
 	RuleDesc        []string
 	BaseTextLengths []int
 	ChainName       string
+	Index           int
+	Rule            string
 }
 
-func EditRule(chainName string, rule string) *EditRuleObject {
+func EditRule(chainName string, rule string, index int) *EditRuleObject {
 	msgBox := widgets.NewList()
 	ruleDesc := []string{
 		"table : ",
@@ -63,6 +67,8 @@ func EditRule(chainName string, rule string) *EditRuleObject {
 		RuleDesc:        ruleDesc,
 		BaseTextLengths: baseTextLengths,
 		ChainName:       chainName,
+		Index:           index,
+		Rule:            rule,
 	}
 }
 
@@ -75,15 +81,25 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	case "<Enter>":
 		showOtherWidget = true
 		// TODO : send command to edit rule
-		ret, err := IptablesAddRule(ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
+		cmd := ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths)
+		cmd.Pos = strconv.Itoa(nc.Index + 1)
+		ret, err := IptablesAddRule(cmd)
 		if err != nil {
+			ui.Clear()
+			ui.Render(state.header, state.footer, state.tabpane)
+			state.SetActive("chainList")
+			state.Render()
 			msgBox := MsgBox(ret)
 			state.handlers["msgBox"] = msgBox
 			state.SetActive("msgBox")
 			state.Render()
 		} else {
-			ret2, err2 := IptablesAddRule(ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
+			ret2, err2 := IptablesDeleteRule(nc.ChainName, nc.Index+2)
 			if err2 != nil {
+				ui.Clear()
+				ui.Render(state.header, state.footer, state.tabpane)
+				state.SetActive("chainList")
+				state.Render()
 				msgBox := MsgBox(ret2)
 				state.handlers["msgBox"] = msgBox
 				state.SetActive("msgBox")
@@ -93,6 +109,7 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 		ui.Clear()
 		ui.Render(state.header, state.footer, state.tabpane)
 		state.SetActive("chainList")
+		state.Render()
 	case "<Down>":
 		nc.Widget.ScrollDown()
 	case "<Up>":
