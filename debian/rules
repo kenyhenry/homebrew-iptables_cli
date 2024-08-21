@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	go build -o iptables_cli main.go
+
+override_dh_install:
+	dh_install
+	install -D -m 0755 iptables_cli $(DESTDIR)/usr/bin/iptables_cli

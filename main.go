@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	ui "github.com/gizak/termui/v3"
@@ -9,6 +11,13 @@ import (
 )
 
 func main() {
+	version := "0.0.1"
+	if len(os.Args) > 1 {
+		if os.Args[1] == "--version" {
+			fmt.Println(version)
+			return
+		}
+	}
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}

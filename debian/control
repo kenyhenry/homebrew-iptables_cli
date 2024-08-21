@@ -1,0 +1,11 @@
+Source: iptables_cli
+Section: utils
+Priority: optional
+Maintainer: keet <henry.keny@outlook.fr>
+Build-Depends: iptables (>= 1.8.8)
+Standards-Version: 0.0.1
+Homepage: https://kenyhenry.github.io/elaborium_website/#/iptables_cli
+Package: iptables_cli
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Iptables cli is a Cli interface for iptables.
