@@ -1,3 +1,3 @@
 #!/bin/sh
 
-go build -o iptables-cli && sudo ./iptables-cli
+go build -o iptables-cli ./src/main.go && sudo ./iptables-cli

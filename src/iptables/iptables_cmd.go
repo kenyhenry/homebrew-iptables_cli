@@ -201,8 +201,9 @@ func generateIptablesArgs(cmd IptablesCmd) []string {
 }
 
 func iptablesCmd(option []string) (string, error) {
-	base := "iptables"
-	full := exec.Command(base, option...)
+	cmd := append([]string{"iptables"}, option...)
+	base := "sudo"
+	full := exec.Command(base, cmd...)
 	// fmt.Println(full)
 	out, err := full.CombinedOutput()
 	return string(out), err
