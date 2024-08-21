@@ -2,15 +2,15 @@ class IptablesCli < Formula
     desc "A brief description of your Go project"
     homepage "https://github.com/kenyhenry/iptables_cli"
     url "https://github.com/kenyhenry/iptables_cli/archive/refs/tags/v0.0.1.tar.gz"
-    sha256 "52f6284505ab46e9f864882f2f991247388e53a9bde1bb32391cafb6be6ad5db"
+    sha256 "1144cb873f0c9791eda34b6f991044a5508a477ec232caa9e313c54b9f743962"
 
     depends_on "go"
 
     def install
-      system "go", "build", "-o", bin/"iptables_cli", "src/main.go"
+      system "go", "build", "-o", usr/bin/"iptables_cli", "src/main.go"
     end
 
     test do
-      system "#{bin}/iptables_cli", "--version"
+      system "#{usr/bin}/iptables_cli", "--version"
     end
   end
