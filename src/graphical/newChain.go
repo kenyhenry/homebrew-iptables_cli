@@ -3,8 +3,8 @@ package graphical
 import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"github.com/kenyhenry/iptables_cli/iptables"
-	"github.com/kenyhenry/iptables_cli/state"
+	"github.com/kenyhenry/iptables_cli/src/iptables"
+	"github.com/kenyhenry/iptables_cli/src/state"
 )
 
 type NewChainObject struct {
