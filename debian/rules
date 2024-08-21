@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 %:
+	
 	dh $@
 
 override_dh_auto_build:
@@ -9,3 +10,6 @@ override_dh_auto_build:
 override_dh_install:
 	dh_install
 	install -D -m 0755 iptables_cli $(DESTDIR)/usr/bin/iptables_cli
+
+override_dh_clean:
+	dh_clean

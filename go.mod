@@ -1,4 +1,4 @@
-module iptables_cli
+module github.com/kenyhenry/iptables_cli
 
 go 1.23
 

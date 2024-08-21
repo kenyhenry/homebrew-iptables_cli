@@ -8,6 +8,8 @@ import (
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli"
+
 )
 
 func main() {
