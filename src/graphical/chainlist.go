@@ -1,22 +1,25 @@
-package main
+package graphical
 
 import (
 	"strconv"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/events"
+	"github.com/kenyhenry/iptables_cli/iptables"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type NewChainlist struct {
 	Widget    *widgets.List
 	Chainlist []string
 	IsMoving  bool
-	Em        *EventManager
+	Em        *events.EventManager
 	ChainName string
 }
 
-func NewChainList(chainName string, em *EventManager) *NewChainlist {
-	chainlist, _, _ := IptablesList(chainName)
+func NewChainList(chainName string, em *events.EventManager) *NewChainlist {
+	chainlist, _, _ := iptables.IptablesList(chainName)
 
 	l := widgets.NewList()
 	l.Rows = chainlist
@@ -37,7 +40,7 @@ func NewChainList(chainName string, em *EventManager) *NewChainlist {
 var ruleStr string
 var indexSelected int
 
-func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
+func (nc *NewChainlist) HandleEvent(e ui.Event, state *state.UIState) {
 	showOtherWidget := false
 
 	switch e.ID {
@@ -47,31 +50,31 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 			indexSelected = nc.Widget.SelectedRow
 			ruleStr = nc.Chainlist[indexSelected]
 		} else {
-			cmd := ExtractAndGenerateCommands(ruleStr, nc.ChainName)
+			cmd := iptables.ExtractAndGenerateCommands(ruleStr, nc.ChainName)
 			cmd.Pos = strconv.Itoa(nc.Widget.SelectedRow + 1)
 			if indexSelected <= nc.Widget.SelectedRow {
 				cmd.Pos = strconv.Itoa(nc.Widget.SelectedRow + 2)
 			}
-			ret, err := IptablesAddRule(cmd)
+			ret, err := iptables.IptablesAddRule(cmd)
 			if err != nil {
 				msgBox := MsgBox(ret)
-				state.handlers["msgBox"] = msgBox
+				state.Handlers["msgBox"] = msgBox
 				state.SetActive("msgBox")
 				state.Render()
 			} else {
 				if indexSelected > nc.Widget.SelectedRow {
 					indexSelected += 1
 				}
-				ret2, err2 := IptablesDeleteRule(nc.ChainName, indexSelected+1)
+				ret2, err2 := iptables.IptablesDeleteRule(nc.ChainName, indexSelected+1)
 				if err2 != nil {
 					msgBox := MsgBox(ret2)
-					state.handlers["msgBox"] = msgBox
+					state.Handlers["msgBox"] = msgBox
 					state.SetActive("msgBox")
 					state.Render()
 				}
 			}
 			ui.Clear()
-			ui.Render(state.header, state.footer, state.tabpane)
+			ui.Render(state.Header, state.Footer, state.Tabpane)
 			state.SetActive("chainList")
 			state.Render()
 
@@ -92,14 +95,14 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 	case "a":
 		showOtherWidget = true
 		newRule := NewRule(nc.ChainName)
-		state.handlers["newRule"] = newRule
+		state.Handlers["newRule"] = newRule
 		state.SetActive("newRule")
 		state.Render()
 	case "e":
 		if len(nc.Chainlist) == 0 {
 			showOtherWidget = true
 			editRule := EditRule(nc.ChainName, nc.Chainlist[nc.Widget.SelectedRow], nc.Widget.SelectedRow)
-			state.handlers["editRule"] = editRule
+			state.Handlers["editRule"] = editRule
 			state.SetActive("editRule")
 			state.Render()
 		}
@@ -107,28 +110,28 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 		showOtherWidget = true
 		info := "Set the policy of chain : " + nc.ChainName
 		selectBox := SelectBox(info, "setPolicy", []string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}, nc.Em)
-		state.handlers["selectBox"] = selectBox
+		state.Handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	case "D":
 		showOtherWidget = true
 		info := "Are you sure you want to delete chain : " + nc.ChainName
 		selectBox := SelectBox(info, "deleteChain", []string{"yes", "no"}, nc.Em)
-		state.handlers["selectBox"] = selectBox
+		state.Handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	case "d":
 		showOtherWidget = true
 		info := "Are you sure you want to delete rule : " + strconv.Itoa(nc.Widget.SelectedRow) + " in chain : " + nc.ChainName
 		selectBox := SelectBox(info, "deleteRule", []string{"yes", "no"}, nc.Em)
-		state.handlers["selectBox"] = selectBox
+		state.Handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	case "F":
 		showOtherWidget = true
 		info := "Are you sure you want to Flush : " + nc.ChainName
 		selectBox := SelectBox(info, "flushChain", []string{"yes", "no"}, nc.Em)
-		state.handlers["selectBox"] = selectBox
+		state.Handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	}

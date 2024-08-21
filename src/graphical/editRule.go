@@ -1,10 +1,12 @@
-package main
+package graphical
 
 import (
 	"strconv"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/iptables"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type EditRuleObject struct {
@@ -47,7 +49,7 @@ func EditRule(chainName string, rule string, index int) *EditRuleObject {
 		baseTextLengths[i] = len(text)
 	}
 
-	cmd := ExtractAndGenerateCommands(rule, chainName)
+	cmd := iptables.ExtractAndGenerateCommands(rule, chainName)
 	ruleDesc[0] += cmd.Table
 	ruleDesc[1] += cmd.Protocol
 	ruleDesc[2] += cmd.SPort
@@ -72,7 +74,7 @@ func EditRule(chainName string, rule string, index int) *EditRuleObject {
 	}
 }
 
-func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
+func (nc *EditRuleObject) HandleEvent(e ui.Event, state *state.UIState) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
 	showOtherWidget := false
@@ -81,33 +83,33 @@ func (nc *EditRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	case "<Enter>":
 		showOtherWidget = true
 		// TODO : send command to edit rule
-		cmd := ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths)
+		cmd := iptables.ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths)
 		cmd.Pos = strconv.Itoa(nc.Index + 1)
-		ret, err := IptablesAddRule(cmd)
+		ret, err := iptables.IptablesAddRule(cmd)
 		if err != nil {
 			ui.Clear()
-			ui.Render(state.header, state.footer, state.tabpane)
+			ui.Render(state.Header, state.Footer, state.Tabpane)
 			state.SetActive("chainList")
 			state.Render()
 			msgBox := MsgBox(ret)
-			state.handlers["msgBox"] = msgBox
+			state.Handlers["msgBox"] = msgBox
 			state.SetActive("msgBox")
 			state.Render()
 		} else {
-			ret2, err2 := IptablesDeleteRule(nc.ChainName, nc.Index+2)
+			ret2, err2 := iptables.IptablesDeleteRule(nc.ChainName, nc.Index+2)
 			if err2 != nil {
 				ui.Clear()
-				ui.Render(state.header, state.footer, state.tabpane)
+				ui.Render(state.Header, state.Footer, state.Tabpane)
 				state.SetActive("chainList")
 				state.Render()
 				msgBox := MsgBox(ret2)
-				state.handlers["msgBox"] = msgBox
+				state.Handlers["msgBox"] = msgBox
 				state.SetActive("msgBox")
 				state.Render()
 			}
 		}
 		ui.Clear()
-		ui.Render(state.header, state.footer, state.tabpane)
+		ui.Render(state.Header, state.Footer, state.Tabpane)
 		state.SetActive("chainList")
 		state.Render()
 	case "<Down>":

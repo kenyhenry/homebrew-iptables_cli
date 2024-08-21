@@ -1,8 +1,9 @@
-package main
+package graphical
 
 import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type MsgBoxObject struct {
@@ -25,7 +26,7 @@ func MsgBox(message string) *MsgBoxObject {
 	}
 }
 
-func (nc *MsgBoxObject) HandleEvent(e ui.Event, state *UIState) {
+func (nc *MsgBoxObject) HandleEvent(e ui.Event, state *state.UIState) {
 	// Do Nothing
 }
 

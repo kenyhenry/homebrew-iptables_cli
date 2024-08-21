@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: iptables_cli
-Source: https://github.com/kenyhenry/iptables_cli
+Upstream-Name: iptables-cli
+Source: https://github.com/kenyhenry/iptables-cli
 
 Files: *
 Copyright: 2024 keet <henry.keny@outlook.fr>

@@ -8,8 +8,10 @@ import (
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"github.com/kenyhenry/iptables_cli"
-
+	"github.com/kenyhenry/iptables_cli/events"
+	"github.com/kenyhenry/iptables_cli/graphical"
+	"github.com/kenyhenry/iptables_cli/iptables"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 func main() {
@@ -73,76 +75,76 @@ func main() {
 	tabpane.ActiveTabIndex = 0
 	tabpane.Border = true
 
-	em := NewEventManager()
-	state := NewUIState(header, footer, tabpane)
+	em := events.NewEventManager()
+	state := state.NewUIState(header, footer, tabpane)
 
-	var currentChainList *NewChainlist
+	var currentChainList *graphical.NewChainlist
 
-	em.AddListener("deleteRule", func(e Event) {
+	em.AddListener("deleteRule", func(e events.Event) {
 		if e.Data == "yes" {
-			IptablesDeleteRule(chain[tabpane.ActiveTabIndex], currentChainList.Widget.SelectedRow+1)
+			iptables.IptablesDeleteRule(chain[tabpane.ActiveTabIndex], currentChainList.Widget.SelectedRow+1)
 		}
 
 	})
 
-	em.AddListener("deleteChain", func(e Event) {
+	em.AddListener("deleteChain", func(e events.Event) {
 		if e.Data == "yes" {
-			out, _ := IptablesDeleteChain(chain[tabpane.ActiveTabIndex])
-			msgBox := MsgBox(out)
-			state.handlers["msgBox"] = msgBox
+			out, _ := iptables.IptablesDeleteChain(chain[tabpane.ActiveTabIndex])
+			msgBox := graphical.MsgBox(out)
+			state.Handlers["msgBox"] = msgBox
 			state.SetActive("msgBox")
 			state.Render()
 		}
 
 	})
 
-	em.AddListener("setPolicy", func(e Event) {
-		out, _ := IptablesSetPolicy(chain[tabpane.ActiveTabIndex], e.Data)
-		msgBox := MsgBox(out)
-		state.handlers["msgBox"] = msgBox
+	em.AddListener("setPolicy", func(e events.Event) {
+		out, _ := iptables.IptablesSetPolicy(chain[tabpane.ActiveTabIndex], e.Data)
+		msgBox := graphical.MsgBox(out)
+		state.Handlers["msgBox"] = msgBox
 		state.SetActive("msgBox")
 		state.Render()
 
 	})
 
-	em.AddListener("flushChain", func(e Event) {
+	em.AddListener("flushChain", func(e events.Event) {
 		info := "Delete all rules from chain : " // + chainName
-		selectBox := SelectBox(info, "flushConfirm", []string{"yes", "no"}, em)
-		state.handlers["selectBox"] = selectBox
+		selectBox := graphical.SelectBox(info, "flushConfirm", []string{"yes", "no"}, em)
+		state.Handlers["selectBox"] = selectBox
 		state.SetActive("selectBox")
 		state.Render()
 	})
 
-	em.AddListener("flushConfirm", func(e Event) {
+	em.AddListener("flushConfirm", func(e events.Event) {
 		if e.Data == "yes" {
-			out, _ := IptablesFlushChain(chain[tabpane.ActiveTabIndex])
-			msgBox := MsgBox(out)
-			state.handlers["msgBox"] = msgBox
+			out, _ := iptables.IptablesFlushChain(chain[tabpane.ActiveTabIndex])
+			msgBox := graphical.MsgBox(out)
+			state.Handlers["msgBox"] = msgBox
 			state.SetActive("msgBox")
 			state.Render()
 		}
 	})
 
 	renderTab := func() {
-		chain, _ = IptablesListChain()
+		chain, _ = iptables.IptablesListChain()
 		for i, item := range chain {
 			parts := strings.Split(item, " ")
 			chain[i] = parts[1]
 		}
 		tabpane.TabNames = chain
 		if tabpane.ActiveTabIndex >= 0 && tabpane.ActiveTabIndex < len(chain) {
-			chainlist := NewChainList(chain[tabpane.ActiveTabIndex], em)
+			chainlist := graphical.NewChainList(chain[tabpane.ActiveTabIndex], em)
 			currentChainList = chainlist
 			// Work arround : on chain overflow terminal, tabpane is not extend
 			tabpane.Title = chain[tabpane.ActiveTabIndex]
-			state.handlers["chainList"] = chainlist
+			state.Handlers["chainList"] = chainlist
 			state.SetActive("chainList")
 		}
 	}
 
 	renderTab()
-	newChain := NewChain()
-	state.handlers["newChain"] = newChain
+	newChain := graphical.NewChain()
+	state.Handlers["newChain"] = newChain
 	ui.Render(header, footer, tabpane)
 	renderTab()
 
@@ -182,14 +184,14 @@ func main() {
 			}
 		case "E":
 			if isDifferentFromKnownHandlers(state) {
-				if !ContainString(chain[tabpane.ActiveTabIndex], []string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}) {
+				if !iptables.ContainString(chain[tabpane.ActiveTabIndex], []string{"DROP", "INPUT", "FORWARD", "ACCEPT", "OUTPUT"}) {
 					state.SetActive("newChain")
 				}
 			} else {
 				state.HandleEvent(e, state)
 			}
 		case "h":
-			helperBox := Helper(help)
+			helperBox := graphical.Helper(help)
 			ui.Render(helperBox.Widget)
 		default:
 			state.HandleEvent(e, state)
@@ -198,10 +200,10 @@ func main() {
 	}
 }
 
-func isDifferentFromKnownHandlers(state *UIState) bool {
-	_, isNewRule := state.activeHandler.(*NewRuleObject)
-	_, isEditRule := state.activeHandler.(*EditRuleObject)
-	_, isNewChain := state.activeHandler.(*NewChainObject)
+func isDifferentFromKnownHandlers(state *state.UIState) bool {
+	_, isNewRule := state.ActiveHandler.(*graphical.NewRuleObject)
+	_, isEditRule := state.ActiveHandler.(*graphical.EditRuleObject)
+	_, isNewChain := state.ActiveHandler.(*graphical.NewChainObject)
 
 	return !isNewRule && !isEditRule && !isNewChain
 }

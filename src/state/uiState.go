@@ -1,4 +1,4 @@
-package main
+package state
 
 import (
 	ui "github.com/gizak/termui/v3"
@@ -11,24 +11,24 @@ type WidgetHandler interface {
 }
 
 type UIState struct {
-	activeHandler WidgetHandler
-	handlers      map[string]WidgetHandler
-	header        *widgets.Paragraph
-	footer        *widgets.Paragraph
-	tabpane       *widgets.TabPane
+	ActiveHandler WidgetHandler
+	Handlers      map[string]WidgetHandler
+	Header        *widgets.Paragraph
+	Footer        *widgets.Paragraph
+	Tabpane       *widgets.TabPane
 }
 
 func NewUIState(header, footer *widgets.Paragraph, tabpane *widgets.TabPane) *UIState {
 	return &UIState{
-		handlers: make(map[string]WidgetHandler),
-		header:   header,
-		footer:   footer,
-		tabpane:  tabpane,
+		Handlers: make(map[string]WidgetHandler),
+		Header:   header,
+		Footer:   footer,
+		Tabpane:  tabpane,
 	}
 }
 func (state *UIState) SetActive(name string) {
-	if handler, exists := state.handlers[name]; exists {
-		state.activeHandler = handler
+	if handler, exists := state.Handlers[name]; exists {
+		state.ActiveHandler = handler
 		state.Render()
 	}
 }
@@ -38,13 +38,13 @@ func (state *UIState) Default() {
 }
 
 func (state *UIState) HandleEvent(e ui.Event, statePrm *UIState) {
-	if state.activeHandler != nil {
-		state.activeHandler.HandleEvent(e, state)
+	if state.ActiveHandler != nil {
+		state.ActiveHandler.HandleEvent(e, state)
 	}
 }
 
 func (state *UIState) Render() {
-	if state.activeHandler != nil {
-		state.activeHandler.Render()
+	if state.ActiveHandler != nil {
+		state.ActiveHandler.Render()
 	}
 }

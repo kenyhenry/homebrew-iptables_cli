@@ -1,18 +1,20 @@
-package main
+package graphical
 
 import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/events"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type SelectBoxObject struct {
 	Widget      *ui.Grid
 	SelectItems []string
-	Em          *EventManager
+	Em          *events.EventManager
 	EventName   string
 }
 
-func SelectBox(textInfo string, eventName string, selectItems []string, em *EventManager) *SelectBoxObject {
+func SelectBox(textInfo string, eventName string, selectItems []string, em *events.EventManager) *SelectBoxObject {
 	selectBox := widgets.NewList()
 
 	termWidth, termHeight := ui.TerminalDimensions()
@@ -55,17 +57,17 @@ func getListItem(grid *ui.Grid) *widgets.List {
 	return widgets.NewList()
 }
 
-func (nc *SelectBoxObject) HandleEvent(e ui.Event, state *UIState) {
+func (nc *SelectBoxObject) HandleEvent(e ui.Event, state *state.UIState) {
 	showOtherWidget := false
 
 	switch e.ID {
 	case "<Enter>":
 		showOtherWidget = true
 		ui.Clear()
-		ui.Render(state.header, state.footer, state.tabpane)
+		ui.Render(state.Header, state.Footer, state.Tabpane)
 		state.SetActive("chainList")
 		list := getListItem(nc.Widget)
-		nc.Em.Emit(Event{Name: nc.EventName, Data: nc.SelectItems[list.SelectedRow]})
+		nc.Em.Emit(events.Event{Name: nc.EventName, Data: nc.SelectItems[list.SelectedRow]})
 		// time.Sleep(time.Second)
 	case "<Down>":
 		list := getListItem(nc.Widget)

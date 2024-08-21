@@ -1,8 +1,10 @@
-package main
+package graphical
 
 import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/iptables"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type NewChainObject struct {
@@ -29,14 +31,14 @@ func NewChain() *NewChainObject {
 	}
 }
 
-func (nc *NewChainObject) HandleEvent(e ui.Event, state *UIState) {
+func (nc *NewChainObject) HandleEvent(e ui.Event, state *state.UIState) {
 	showOtherWidget := false
 	switch e.ID {
 	case "<Enter>":
 		showOtherWidget = true
-		out, _ := IptablesAddChain(nc.Widget.Text[len(nc.BaseText):])
+		out, _ := iptables.IptablesAddChain(nc.Widget.Text[len(nc.BaseText):])
 		msgBox := MsgBox(out)
-		state.handlers["msgBox"] = msgBox
+		state.Handlers["msgBox"] = msgBox
 		state.SetActive("msgBox")
 		state.Render()
 	case "<Backspace>":

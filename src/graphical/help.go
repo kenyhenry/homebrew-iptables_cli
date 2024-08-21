@@ -1,8 +1,9 @@
-package main
+package graphical
 
 import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type HelperObject struct {
@@ -25,7 +26,7 @@ func Helper(message string) *HelperObject {
 	}
 }
 
-func (nc *HelperObject) HandleEvent(e ui.Event, state *UIState) {
+func (nc *HelperObject) HandleEvent(e ui.Event, state *state.UIState) {
 	// Do Nothing
 }
 

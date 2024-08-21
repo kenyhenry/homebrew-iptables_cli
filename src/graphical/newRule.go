@@ -1,8 +1,10 @@
-package main
+package graphical
 
 import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/kenyhenry/iptables_cli/iptables"
+	"github.com/kenyhenry/iptables_cli/state"
 )
 
 type NewRuleObject struct {
@@ -52,7 +54,7 @@ func NewRule(chaineName string) *NewRuleObject {
 	}
 }
 
-func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
+func (nc *NewRuleObject) HandleEvent(e ui.Event, state *state.UIState) {
 	currentRow := nc.Widget.SelectedRow
 	baseTextLength := nc.BaseTextLengths[currentRow]
 	showOtherWidget := false
@@ -60,12 +62,12 @@ func (nc *NewRuleObject) HandleEvent(e ui.Event, state *UIState) {
 	switch e.ID {
 	case "<Enter>":
 		showOtherWidget = true
-		ret, _ := IptablesAddRule(ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
+		ret, _ := iptables.IptablesAddRule(iptables.ArraytToCmd(nc.ChainName, nc.RuleDesc, nc.BaseTextLengths))
 		ui.Clear()
-		ui.Render(state.header, state.footer, state.tabpane)
+		ui.Render(state.Header, state.Footer, state.Tabpane)
 		state.SetActive("chainList")
 		msgBox := MsgBox(ret)
-		state.handlers["msgBox"] = msgBox
+		state.Handlers["msgBox"] = msgBox
 		state.SetActive("msgBox")
 		state.Render()
 	case "<Down>":
