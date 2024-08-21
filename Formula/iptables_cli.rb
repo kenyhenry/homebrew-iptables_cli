@@ -7,7 +7,9 @@ class IptablesCli < Formula
     depends_on "go"
 
     def install
-      system "go", "build", "-o", bin/"iptables_cli"
+        cd "src" do
+            system "go", "build", "-o", bin/"iptables_cli", "main.go"
+        end
     end
 
     test do
