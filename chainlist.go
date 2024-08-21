@@ -25,14 +25,6 @@ func NewChainList(chainName string, em *EventManager) *NewChainlist {
 	termWidth, termHeight := ui.TerminalDimensions()
 	l.SetRect(1, 12, termWidth-1, termHeight-4)
 
-	// BUG : add listener each new chainlist, induce multiple deleteCRule
-	em.AddListener("deleteRule", func(e Event) {
-		if e.Data == "yes" {
-			IptablesDeleteRule(chainName, l.SelectedRow)
-		}
-
-	})
-
 	return &NewChainlist{
 		Widget:    l,
 		Chainlist: chainlist,
@@ -50,6 +42,7 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 
 	switch e.ID {
 	case "<Enter>":
+		showOtherWidget = true
 		if !nc.IsMoving {
 			indexSelected = nc.Widget.SelectedRow
 			ruleStr = nc.Chainlist[indexSelected]
@@ -103,11 +96,13 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 		state.SetActive("newRule")
 		state.Render()
 	case "e":
-		showOtherWidget = true
-		editRule := EditRule(nc.ChainName, nc.Chainlist[nc.Widget.SelectedRow], nc.Widget.SelectedRow)
-		state.handlers["editRule"] = editRule
-		state.SetActive("editRule")
-		state.Render()
+		if len(nc.Chainlist) == 0 {
+			showOtherWidget = true
+			editRule := EditRule(nc.ChainName, nc.Chainlist[nc.Widget.SelectedRow], nc.Widget.SelectedRow)
+			state.handlers["editRule"] = editRule
+			state.SetActive("editRule")
+			state.Render()
+		}
 	case "P":
 		showOtherWidget = true
 		info := "Set the policy of chain : " + nc.ChainName

@@ -63,8 +63,16 @@ func main() {
 	tabpane.Border = true
 
 	em := NewEventManager()
-
 	state := NewUIState(header, footer, tabpane)
+
+	var currentChainList *NewChainlist
+
+	em.AddListener("deleteRule", func(e Event) {
+		if e.Data == "yes" {
+			IptablesDeleteRule(chain[tabpane.ActiveTabIndex], currentChainList.Widget.SelectedRow+1)
+		}
+
+	})
 
 	em.AddListener("deleteChain", func(e Event) {
 		if e.Data == "yes" {
@@ -113,6 +121,7 @@ func main() {
 		tabpane.TabNames = chain
 		if tabpane.ActiveTabIndex >= 0 && tabpane.ActiveTabIndex < len(chain) {
 			chainlist := NewChainList(chain[tabpane.ActiveTabIndex], em)
+			currentChainList = chainlist
 			// Work arround : on chain overflow terminal, tabpane is not extend
 			tabpane.Title = chain[tabpane.ActiveTabIndex]
 			state.handlers["chainList"] = chainlist
