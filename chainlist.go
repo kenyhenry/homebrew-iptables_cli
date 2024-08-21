@@ -49,17 +49,15 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 	showOtherWidget := false
 
 	switch e.ID {
-	// BUG : move iptable rule not working index error
 	case "<Enter>":
 		if !nc.IsMoving {
 			indexSelected = nc.Widget.SelectedRow
 			ruleStr = nc.Chainlist[indexSelected]
 		} else {
 			cmd := ExtractAndGenerateCommands(ruleStr, nc.ChainName)
-			if indexSelected <= nc.Widget.SelectedRow-1 {
-				cmd.Pos = strconv.Itoa(nc.Widget.SelectedRow + 1)
-			} else {
-				cmd.Pos = strconv.Itoa(nc.Widget.SelectedRow - 1)
+			cmd.Pos = strconv.Itoa(nc.Widget.SelectedRow + 1)
+			if indexSelected <= nc.Widget.SelectedRow {
+				cmd.Pos = strconv.Itoa(nc.Widget.SelectedRow + 2)
 			}
 			ret, err := IptablesAddRule(cmd)
 			if err != nil {
@@ -68,16 +66,16 @@ func (nc *NewChainlist) HandleEvent(e ui.Event, state *UIState) {
 				state.SetActive("msgBox")
 				state.Render()
 			} else {
-				// if indexSelected < nc.Widget.SelectedRow {
-				// 	indexSelected++
-				// }
-				// ret2, err2 := IptablesDeleteRule(nc.ChainName, indexSelected)
-				// if err2 != nil {
-				// msgBox := MsgBox(ret2)
-				// state.handlers["msgBox"] = msgBox
-				// state.SetActive("msgBox")
-				// state.Render()
-				// }
+				if indexSelected > nc.Widget.SelectedRow {
+					indexSelected += 1
+				}
+				ret2, err2 := IptablesDeleteRule(nc.ChainName, indexSelected+1)
+				if err2 != nil {
+					msgBox := MsgBox(ret2)
+					state.handlers["msgBox"] = msgBox
+					state.SetActive("msgBox")
+					state.Render()
+				}
 			}
 			ui.Clear()
 			ui.Render(state.header, state.footer, state.tabpane)
