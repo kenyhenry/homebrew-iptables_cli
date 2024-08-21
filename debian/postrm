@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+# Commands to run after package removal
+# Remove the binary if it still exists
+if [ -e /usr/bin/iptables-cli ]; then
+    rm -f /usr/bin/iptables-cli
+fi
+

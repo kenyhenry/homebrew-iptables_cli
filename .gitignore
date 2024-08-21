@@ -25,4 +25,7 @@ go.work.sum
 .env
 
 test.go
-iptables_cli
+iptables-cli
+iptables-cli.substvars
+files
+debhelper-build-stamp
